@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -19,6 +21,58 @@ type FileEntry struct {
 	Frequency    int
 	LastAccessed time.Time
 }
+
+// Sorting Methods
+
+type ByFrequencyThenRecency []FileEntry
+
+func (a ByFrequencyThenRecency) Len() int      { return len(a) }
+func (a ByFrequencyThenRecency) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a ByFrequencyThenRecency) Less(i, j int) bool {
+	// Sort by frequency (descending), then by last accessed (descending)
+	if a[i].Frequency != a[j].Frequency {
+		return a[i].Frequency > a[j].Frequency
+	}
+	return a[i].LastAccessed.After(a[j].LastAccessed)
+}
+
+func sortEntries(entries []FileEntry) []FileEntry {
+	sort.Sort(ByFrequencyThenRecency(entries))
+	return entries
+}
+
+func openTopChoice(command string) {
+	entries, err := readFileEntries()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	entries = sortEntries(entries) // Sort by frequency or use another sorting function
+
+	if len(entries) > 0 {
+		topEntry := entries[0]
+		// Execute the specified command on the top entry
+		cmd := exec.Command(command, topEntry.Path)
+		err := cmd.Run()
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		fmt.Println("No entries found.")
+	}
+}
+
+// Display
+
+func displaySortedEntries(entries []FileEntry) {
+	entries = sortEntries(entries)
+	for _, entry := range entries {
+		fmt.Printf("Path: %s, Frequency: %d, Last Accessed: %s\n",
+			entry.Path, entry.Frequency, entry.LastAccessed.Format(time.RFC3339))
+	}
+}
+
+// File methods
 
 func LoadDataFile() {
 	homeDir, err := os.UserHomeDir()
