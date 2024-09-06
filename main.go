@@ -15,7 +15,7 @@ func main() {
 
 	flag.Parse()
 
-	LoadDataFile()
+	LoadStore()
 
 	if *add != "" {
 		logFileAccess(*add)
@@ -32,7 +32,7 @@ func main() {
 	}
 
 	// Retrieve and display sorted entries
-	entries, err := readFileEntries()
+	entries, err := readFromStore()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -45,6 +45,6 @@ func main() {
 	if *execCmd != "" {
 		// Open the top choice with the specified command if -exec is set
 		openTopChoice(*execCmd)
-		logFileAccess("/path/to/file1")
+		// logFileAccess("/path/to/file1")
 	}
 }

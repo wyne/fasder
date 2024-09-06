@@ -1,15 +1,10 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"log"
-	"os"
 	"os/exec"
-	"path/filepath"
 	"sort"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -42,7 +37,7 @@ func sortEntries(entries []FileEntry) []FileEntry {
 }
 
 func openTopChoice(command string) {
-	entries, err := readFileEntries()
+	entries, err := readFromStore()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -62,65 +57,8 @@ func openTopChoice(command string) {
 	}
 }
 
-// Display
-
-func displaySortedEntries(entries []FileEntry) {
-	entries = sortEntries(entries)
-	for _, entry := range entries {
-		fmt.Printf("Path: %s, Frequency: %d, Last Accessed: %s\n",
-			entry.Path, entry.Frequency, entry.LastAccessed)
-	}
-}
-
-// File methods
-
-func LoadDataFile() {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		// Silently return
-		return
-	}
-
-	// Expand the ~ to the home directory
-	dataFile = filepath.Join(homeDir, ".fasder")
-}
-
-// Reads the `.fasd` file and loads file entries into a slice
-func readFileEntries() ([]FileEntry, error) {
-	var entries []FileEntry
-	f, err := os.Open(dataFile)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return entries, nil // File doesn't exist yet, return empty list
-		}
-		return nil, err
-	}
-	defer f.Close()
-
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		line := scanner.Text()
-		parts := strings.Split(line, "|")
-		if len(parts) != 3 {
-			continue // Skip malformed lines
-		}
-
-		freq, _ := strconv.Atoi(parts[1])
-		lastAccessed, _ := strconv.ParseInt(parts[2], 10, 64)
-
-		entry := FileEntry{
-			Path:         parts[0],
-			Frequency:    freq,
-			LastAccessed: lastAccessed,
-		}
-		entries = append(entries, entry)
-	}
-
-	return entries, scanner.Err()
-}
-
 func logFileAccess(path string) {
-	entries, err := readFileEntries()
+	entries, err := readFromStore()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -146,20 +84,5 @@ func logFileAccess(path string) {
 	}
 
 	// Write updated entries back to the file
-	writeToFile(entries)
-}
-
-func writeToFile(entries []FileEntry) {
-	f, err := os.Create(dataFile) // Truncate and rewrite the file
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-
-	for _, entry := range entries {
-		line := fmt.Sprintf("%s|%d|%d\n", entry.Path, entry.Frequency, entry.LastAccessed)
-		if _, err := f.WriteString(line); err != nil {
-			log.Fatal(err)
-		}
-	}
+	writeToStore(entries)
 }
