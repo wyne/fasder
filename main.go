@@ -9,6 +9,7 @@ import (
 func main() {
 	// Implement command-line flags
 	search := flag.String("f", "", "Search for a file")
+	add := flag.String("add", "", "Add object to store")
 	display := flag.Bool("display", false, "Display sorted file entries")
 	execCmd := flag.String("exec", "", "Command to open the top choice")
 
@@ -16,10 +17,17 @@ func main() {
 
 	LoadDataFile()
 
+	if *add != "" {
+		logFileAccess(*add)
+		return
+	}
+
 	if *search != "" {
 		fmt.Println("Searching for file:", *search)
 		// Add search logic here
+		// print database
 	} else {
+		// print database
 		fmt.Println("No search provided.")
 	}
 

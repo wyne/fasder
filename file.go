@@ -19,7 +19,7 @@ var dataFile string
 type FileEntry struct {
 	Path         string
 	Frequency    int
-	LastAccessed time.Time
+	LastAccessed int64
 }
 
 // Sorting Methods
@@ -33,7 +33,7 @@ func (a ByFrequencyThenRecency) Less(i, j int) bool {
 	if a[i].Frequency != a[j].Frequency {
 		return a[i].Frequency > a[j].Frequency
 	}
-	return a[i].LastAccessed.After(a[j].LastAccessed)
+	return a[i].LastAccessed > (a[j].LastAccessed)
 }
 
 func sortEntries(entries []FileEntry) []FileEntry {
@@ -68,7 +68,7 @@ func displaySortedEntries(entries []FileEntry) {
 	entries = sortEntries(entries)
 	for _, entry := range entries {
 		fmt.Printf("Path: %s, Frequency: %d, Last Accessed: %s\n",
-			entry.Path, entry.Frequency, entry.LastAccessed.Format(time.RFC3339))
+			entry.Path, entry.Frequency, entry.LastAccessed)
 	}
 }
 
@@ -100,13 +100,13 @@ func readFileEntries() ([]FileEntry, error) {
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		line := scanner.Text()
-		parts := strings.Fields(line)
+		parts := strings.Split(line, "|")
 		if len(parts) != 3 {
 			continue // Skip malformed lines
 		}
 
 		freq, _ := strconv.Atoi(parts[1])
-		lastAccessed, _ := time.Parse(time.RFC3339, parts[2])
+		lastAccessed, _ := strconv.ParseInt(parts[2], 10, 64)
 
 		entry := FileEntry{
 			Path:         parts[0],
@@ -129,7 +129,7 @@ func logFileAccess(path string) {
 	for i, entry := range entries {
 		if entry.Path == path {
 			entries[i].Frequency++
-			entries[i].LastAccessed = time.Now()
+			entries[i].LastAccessed = time.Now().Unix()
 			found = true
 			break
 		}
@@ -140,7 +140,7 @@ func logFileAccess(path string) {
 		newEntry := FileEntry{
 			Path:         path,
 			Frequency:    1,
-			LastAccessed: time.Now(),
+			LastAccessed: time.Now().Unix(),
 		}
 		entries = append(entries, newEntry)
 	}
@@ -157,7 +157,7 @@ func writeToFile(entries []FileEntry) {
 	defer f.Close()
 
 	for _, entry := range entries {
-		line := fmt.Sprintf("%s %d %s\n", entry.Path, entry.Frequency, entry.LastAccessed.Format(time.RFC3339))
+		line := fmt.Sprintf("%s|%d|%d\n", entry.Path, entry.Frequency, entry.LastAccessed)
 		if _, err := f.WriteString(line); err != nil {
 			log.Fatal(err)
 		}
