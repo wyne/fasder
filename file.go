@@ -110,7 +110,9 @@ func execute(entries []FileEntry, command string) {
 		cmdStr := fmt.Sprintf("%s %s", command, bestMatch.Path)
 		parts := strings.Split(cmdStr, " ")
 		cmd := exec.Command(parts[0], parts[1:]...)
+		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
 		err := cmd.Run()
 		if err != nil {
 			log.Fatal(err)

@@ -1,4 +1,16 @@
-PS1='\[\033[35m\]\w > \[\033[0m\]'
+#PS1='\[\033[35m\]\w > \[\033[0m\]'
+
+PROMPT='%F{magenta}%~ >%f '
+
+source ~/.zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+export ZSH=~/.oh-my-zsh
+plugins=(
+  zsh-completions
+  zsh-syntax-highlighting
+)
+
+source $ZSH/oh-my-zsh.sh
 
 alias fasder=~/workspace/fasder/fasder
 
