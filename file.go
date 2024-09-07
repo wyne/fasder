@@ -40,26 +40,51 @@ func sortEntries(entries []FileEntry) []FileEntry {
 }
 
 // Fuzzy search function
-func fuzzyFind(entries []FileEntry, searchTerm string) []FileEntry {
-	if searchTerm == "" {
-		return entries
-	}
-
-	var paths []string
-	for _, entry := range entries {
-		paths = append(paths, entry.Path)
-	}
-
-	// Perform fuzzy search
-	matches := fuzzy.Find(searchTerm, paths)
-
+func fuzzyFind(entries []FileEntry, searchTerm string, filesOnly bool, dirsOnly bool) []FileEntry {
 	// Collect matching entries
 	var results []FileEntry
-	for _, match := range matches {
-		results = append(results, entries[match.Index])
+
+	if searchTerm == "" {
+		results = entries
+	} else {
+
+		var paths []string
+		for _, entry := range entries {
+			paths = append(paths, entry.Path)
+		}
+
+		// Perform fuzzy search
+		matches := fuzzy.Find(searchTerm, paths)
+
+		for _, match := range matches {
+			results = append(results, entries[match.Index])
+		}
 	}
 
-	return results
+	return filterEntries(results, filesOnly, dirsOnly)
+}
+
+// Helper function to filter files or directories
+func filterEntries(entries []FileEntry, files bool, dirs bool) []FileEntry {
+	logger.Log.Printf("Filtering files: %v, dirs: %v", files, dirs)
+	var filtered []FileEntry
+
+	for _, entry := range entries {
+		info, err := os.Stat(entry.Path)
+		if err != nil {
+			// Handle error (e.g., if the file does not exist)
+			continue
+		}
+
+		// Filter based on the flags
+		if dirs && info.IsDir() {
+			filtered = append(filtered, entry)
+		} else if files && !info.IsDir() {
+			filtered = append(filtered, entry)
+		}
+	}
+
+	return filtered
 }
 
 func execute(entries []FileEntry, command string) {

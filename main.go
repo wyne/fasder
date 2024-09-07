@@ -21,13 +21,15 @@ func main() {
 	proc := flag.Bool("proc", false, "Process a command")
 	execCmd := flag.String("e", "", "Command to open the top choice")
 
-	filesOnly := flag.Bool("f", false, "Files")
-
-	LoadFileStore()
+	filesOnly := flag.Bool("f", false, "Files only")
+	dirsOnly := flag.Bool("d", false, "Dirs only")
 
 	flag.Parse()
 
-	logger.Log.Printf("Positional arguments: %v\n", flag.Args())
+	files := *filesOnly || (!*filesOnly && !*dirsOnly)
+	dirs := *dirsOnly || (!*filesOnly && !*dirsOnly)
+
+	LoadFileStore()
 
 	// Commands
 
@@ -61,7 +63,7 @@ func main() {
 	searchTerm := strings.Join(flag.Args(), " ")
 
 	logger.Log.Printf("searching.... %s", searchTerm)
-	matchingEntries := fuzzyFind(entries, searchTerm)
+	matchingEntries := fuzzyFind(entries, searchTerm, files, dirs)
 
 	sortedEntries := sortEntries(matchingEntries)
 
