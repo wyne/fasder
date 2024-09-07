@@ -41,6 +41,10 @@ func sortEntries(entries []FileEntry) []FileEntry {
 
 // Fuzzy search function
 func fuzzyFind(entries []FileEntry, searchTerm string) []FileEntry {
+	if searchTerm == "" {
+		return entries
+	}
+
 	var paths []string
 	for _, entry := range entries {
 		paths = append(paths, entry.Path)
