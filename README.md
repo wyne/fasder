@@ -36,9 +36,9 @@ alias v='f -e nvim'   # open best file match in nvim
 # To-do
 
 - [x] Support more aliases
+- [x] VHS Tapes
+- [x] Brew Formulae (`brew install wyne/tap/fasder`)
 - [ ] Increment score on execution with -e flag
 - [ ] Better ranking
   - [ ] Ranking decay
-- [ ] Remove from store on filtering
-- [ ] VHS Tapes
-- [ ] Brew Formulae
+- [ ] Remove entries from db on filtering
