@@ -6,14 +6,14 @@ import (
 
 // Display
 
-func displaySortedEntries(entries []FileEntry, list bool) {
+func displaySortedEntries(entries []PathEntry, list bool) {
 	for _, entry := range entries {
 		if list {
 			fmt.Println(entry.Path)
 		} else {
 			fmt.Printf(
-				"%d\t%s\n",
-				entry.Frequency,
+				"%.5f\t%s\n",
+				entry.Rank,
 				entry.Path)
 		}
 	}

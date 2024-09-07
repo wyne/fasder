@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/wyne/fasder/logger"
 )
 
 var dataFile string
@@ -26,8 +28,8 @@ func LoadFileStore() {
 
 // Reads the `.fasder` file and loads file entries into a slice
 
-func readFileStore() ([]FileEntry, error) {
-	var entries []FileEntry
+func readFileStore() ([]PathEntry, error) {
+	var entries []PathEntry
 	f, err := os.Open(dataFile)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -45,12 +47,12 @@ func readFileStore() ([]FileEntry, error) {
 			continue // Skip malformed lines
 		}
 
-		freq, _ := strconv.Atoi(parts[1])
+		freq, _ := strconv.ParseFloat(parts[1], 64)
 		lastAccessed, _ := strconv.ParseInt(parts[2], 10, 64)
 
-		entry := FileEntry{
+		entry := PathEntry{
 			Path:         parts[0],
-			Frequency:    freq,
+			Rank:         freq,
 			LastAccessed: lastAccessed,
 		}
 		entries = append(entries, entry)
@@ -59,7 +61,7 @@ func readFileStore() ([]FileEntry, error) {
 	return entries, scanner.Err()
 }
 
-func writeFileStore(entries []FileEntry) {
+func writeFileStore(entries []PathEntry) {
 	f, err := os.Create(dataFile) // Truncate and rewrite the file
 	if err != nil {
 		log.Fatal(err)
@@ -67,7 +69,7 @@ func writeFileStore(entries []FileEntry) {
 	defer f.Close()
 
 	for _, entry := range entries {
-		line := fmt.Sprintf("%s|%d|%d\n", entry.Path, entry.Frequency, entry.LastAccessed)
+		line := fmt.Sprintf("%s|%.5f|%d\n", entry.Path, entry.Rank, entry.LastAccessed)
 		if _, err := f.WriteString(line); err != nil {
 			log.Fatal(err)
 		}
@@ -84,7 +86,13 @@ func AddToStore(path string) {
 	found := false
 	for i, entry := range entries {
 		if entry.Path == path {
-			entries[i].Frequency++
+			logger.Log.Printf(
+				"Old rank: %v, new rank: %v",
+				entries[i].Rank,
+				entries[i].Rank+1/entries[i].Rank,
+			)
+			entries[i].Rank = entries[i].Rank + 1/entries[i].Rank
+
 			entries[i].LastAccessed = time.Now().Unix()
 			found = true
 			break
@@ -93,9 +101,9 @@ func AddToStore(path string) {
 
 	if !found {
 		// Add a new entry if the file hasn't been logged before
-		newEntry := FileEntry{
+		newEntry := PathEntry{
 			Path:         path,
-			Frequency:    1,
+			Rank:         1,
 			LastAccessed: time.Now().Unix(),
 		}
 		entries = append(entries, newEntry)

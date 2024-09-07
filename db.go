@@ -15,7 +15,7 @@ import (
 // Struct to hold the file metadata
 type PathEntry struct {
 	Path         string
-	Frequency    int
+	Rank         float64
 	LastAccessed int64 // Unix timestamp
 }
 
@@ -34,14 +34,14 @@ func (a ByFrequencyThenRecency) Swap(i, j int) {
 func (a ByFrequencyThenRecency) Less(i, j int) bool {
 	if a.reverse {
 		// Sort in descending order
-		if a.entries[i].Frequency != a.entries[j].Frequency {
-			return a.entries[i].Frequency > a.entries[j].Frequency
+		if a.entries[i].Rank != a.entries[j].Rank {
+			return a.entries[i].Rank > a.entries[j].Rank
 		}
 		return a.entries[i].LastAccessed > a.entries[j].LastAccessed
 	} else {
 		// Sort in ascending order
-		if a.entries[i].Frequency != a.entries[j].Frequency {
-			return a.entries[i].Frequency < a.entries[j].Frequency
+		if a.entries[i].Rank != a.entries[j].Rank {
+			return a.entries[i].Rank < a.entries[j].Rank
 		}
 		return a.entries[i].LastAccessed < a.entries[j].LastAccessed
 	}
