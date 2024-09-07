@@ -18,7 +18,7 @@ func main() {
 	init := flag.Bool("init", false, "Initializers: zsh-hook")
 	sanitize := flag.Bool("sanitize", false, "Sanitize command before processing")
 	proc := flag.Bool("proc", false, "Process a command")
-	execCmd := flag.String("exec", "", "Command to open the top choice")
+	execCmd := flag.String("e", "", "Command to open the top choice")
 
 	filesOnly := flag.Bool("f", false, "Files")
 
@@ -57,7 +57,7 @@ func main() {
 
 	if *execCmd != "" {
 		// Open the top choice with the specified command if -exec is set
-		openTopChoice(*execCmd)
+		execute(*execCmd)
 		// logFileAccess("/path/to/file1")
 	} else {
 		logger.Log.Printf("displaying... %v", filesOnly)

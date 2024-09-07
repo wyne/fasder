@@ -3,8 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"sort"
+
+	"github.com/wyne/fasder/logger"
 )
 
 var dataFile string
@@ -35,7 +38,7 @@ func sortEntries(entries []FileEntry) []FileEntry {
 	return entries
 }
 
-func openTopChoice(command string) {
+func execute(command string) {
 	entries, err := readFileStore()
 	if err != nil {
 		log.Fatal(err)
@@ -46,7 +49,10 @@ func openTopChoice(command string) {
 	if len(entries) > 0 {
 		topEntry := entries[0]
 		// Execute the specified command on the top entry
+		logger.Log.Printf("executing command: %s %s", command, topEntry.Path)
 		cmd := exec.Command(command, topEntry.Path)
+
+		cmd.Stdout = os.Stdout
 		err := cmd.Run()
 		if err != nil {
 			log.Fatal(err)
