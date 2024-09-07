@@ -8,7 +8,7 @@ Set Shell "zsh --no-rcs"
 
 Set FontSize 16
 Set Width 900
-Set Height 600
+Set Height 300
 Set Padding 20
 
 Require vim
@@ -43,6 +43,20 @@ Enter
 Sleep 2s
 
 Type "fasder -f -e vim fil # Open the best match with vim"
+Sleep 1s
+Enter
+Sleep 2s
+
+Type ":q"
+Enter
+Sleep 1s
+
+Type "alias v='fasder -f -e vim' # Make an alias for faster use"
+Sleep 1s
+Enter
+Sleep 2s
+
+Type "v fil # Productivity boost"
 Sleep 1s
 Enter
 Sleep 2s
