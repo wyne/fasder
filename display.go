@@ -7,7 +7,6 @@ import (
 // Display
 
 func displaySortedEntries(entries []FileEntry) {
-	entries = sortEntries(entries)
 	for _, entry := range entries {
 		fmt.Printf(
 			"%d\t%s\n",

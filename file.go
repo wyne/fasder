@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"sort"
 
+	"github.com/sahilm/fuzzy"
 	"github.com/wyne/fasder/logger"
 )
 
@@ -38,16 +39,28 @@ func sortEntries(entries []FileEntry) []FileEntry {
 	return entries
 }
 
-func execute(command string) {
-	entries, err := readFileStore()
-	if err != nil {
-		log.Fatal(err)
+// Fuzzy search function
+func fuzzyFind(entries []FileEntry, searchTerm string) []FileEntry {
+	var paths []string
+	for _, entry := range entries {
+		paths = append(paths, entry.Path)
 	}
 
-	entries = sortEntries(entries) // Sort by frequency or use another sorting function
+	// Perform fuzzy search
+	matches := fuzzy.Find(searchTerm, paths)
 
+	// Collect matching entries
+	var results []FileEntry
+	for _, match := range matches {
+		results = append(results, entries[match.Index])
+	}
+
+	return results
+}
+
+func execute(entries []FileEntry, command string) {
 	if len(entries) > 0 {
-		topEntry := entries[0]
+		topEntry := entries[len(entries)-1]
 		// Execute the specified command on the top entry
 		logger.Log.Printf("executing command: %s %s", command, topEntry.Path)
 		cmd := exec.Command(command, topEntry.Path)

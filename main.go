@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"strings"
 
 	"github.com/wyne/fasder/logger"
 )
@@ -25,6 +26,8 @@ func main() {
 	LoadFileStore()
 
 	flag.Parse()
+
+	logger.Log.Printf("Positional arguments: %v\n", flag.Args())
 
 	// Commands
 
@@ -55,12 +58,19 @@ func main() {
 		log.Fatal(err)
 	}
 
+	searchTerm := strings.Join(flag.Args(), " ")
+
+	logger.Log.Printf("searching.... %s", searchTerm)
+	matchingEntries := fuzzyFind(entries, searchTerm)
+
+	sortedEntries := sortEntries(matchingEntries)
+
 	if *execCmd != "" {
 		// Open the top choice with the specified command if -exec is set
-		execute(*execCmd)
+		execute(sortedEntries, *execCmd)
 		// logFileAccess("/path/to/file1")
 	} else {
 		logger.Log.Printf("displaying... %v", filesOnly)
-		displaySortedEntries(entries)
+		displaySortedEntries(sortedEntries)
 	}
 }
