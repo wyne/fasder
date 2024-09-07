@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -24,7 +25,13 @@ func Init(args []string) {
 
 // Process command from shell hooks
 func Proc(args []string) {
-	logger.Logger.Printf("Processing: %s", args)
+	cwd, err := os.Getwd()
+	if err != nil {
+		logger.Log.Println("Error getting working directory:", err)
+		return
+	}
+
+	logger.Log.Printf("Processing: %s, %s", cwd, args)
 }
 
 // Sanitize command from shell hooks before processing
