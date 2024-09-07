@@ -23,20 +23,34 @@ type FileEntry struct {
 
 // Sorting Methods
 
-type ByFrequencyThenRecency []FileEntry
-
-func (a ByFrequencyThenRecency) Len() int      { return len(a) }
-func (a ByFrequencyThenRecency) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a ByFrequencyThenRecency) Less(i, j int) bool {
-	// Sort by frequency (ascending), then by last accessed (ascending)
-	if a[i].Frequency != a[j].Frequency {
-		return a[i].Frequency < a[j].Frequency
-	}
-	return a[i].LastAccessed < (a[j].LastAccessed)
+type ByFrequencyThenRecency struct {
+	entries []FileEntry
+	reverse bool
 }
 
-func sortEntries(entries []FileEntry) []FileEntry {
-	sort.Sort(ByFrequencyThenRecency(entries))
+func (a ByFrequencyThenRecency) Len() int { return len(a.entries) }
+func (a ByFrequencyThenRecency) Swap(i, j int) {
+	a.entries[i], a.entries[j] = a.entries[j], a.entries[i]
+}
+
+func (a ByFrequencyThenRecency) Less(i, j int) bool {
+	if a.reverse {
+		// Sort in descending order
+		if a.entries[i].Frequency != a.entries[j].Frequency {
+			return a.entries[i].Frequency > a.entries[j].Frequency
+		}
+		return a.entries[i].LastAccessed > a.entries[j].LastAccessed
+	} else {
+		// Sort in ascending order
+		if a.entries[i].Frequency != a.entries[j].Frequency {
+			return a.entries[i].Frequency < a.entries[j].Frequency
+		}
+		return a.entries[i].LastAccessed < a.entries[j].LastAccessed
+	}
+}
+
+func sortEntries(entries []FileEntry, reverse bool) []FileEntry {
+	sort.Sort(ByFrequencyThenRecency{entries, reverse})
 	return entries
 }
 

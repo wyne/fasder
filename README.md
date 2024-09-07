@@ -25,6 +25,17 @@ alias a='fasder'        # both files and directories
 alias d='fasder -d'     # directories only
 alias f='fasder -f'     # files only
 alias z='fasder_cd -d'  # cd to best match. ex: `z work` to cd to workspace
+alias j='fasder_cd -d'  # cd to best match. ex: `z work` to cd to workspace
+```
+
+FZF integration for quick selecting from a list
+
+```bash
+eval "$(fasder --init zsh-hook aliases fzf-aliases)"
+```
+
+```bash
+alias jj='fasder_cd -d'  # cd to best match. ex: `z work` to cd to workspace
 ```
 
 ## Usage
@@ -39,4 +50,5 @@ alias v='f -e nvim' # open in nvim
 - [x] Support more aliases
 - [ ] Increment score on execution with -e flag
 - [ ] Better ranking
+  - [ ] Ranking decay
 - [ ] Remove from store on filtering

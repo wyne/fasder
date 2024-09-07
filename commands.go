@@ -18,6 +18,8 @@ func Init(args []string) {
 			zshHook()
 		case "aliases":
 			aliases()
+		case "fzf-aliases":
+			fzfAliases()
 		}
 	}
 }

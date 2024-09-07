@@ -21,6 +21,7 @@ func main() {
 	proc := flag.Bool("proc", false, "Process a command")
 	execCmd := flag.String("e", "", "Command to open the top choice")
 	list := flag.Bool("l", false, "List only, no values")
+	reverse := flag.Bool("r", false, "Reverse sort. Useful to pipe into fzf")
 
 	filesOnly := flag.Bool("f", false, "Files only")
 	dirsOnly := flag.Bool("d", false, "Dirs only")
@@ -66,7 +67,7 @@ func main() {
 	logger.Log.Printf("searching.... %s", searchTerm)
 	matchingEntries := fuzzyFind(entries, searchTerm, files, dirs)
 
-	sortedEntries := sortEntries(matchingEntries)
+	sortedEntries := sortEntries(matchingEntries, *reverse)
 
 	if *execCmd != "" {
 		// Open the top choice with the specified command if -exec is set

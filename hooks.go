@@ -16,19 +16,56 @@ add-zsh-hook preexec _fasder_preexec
 }
 
 func aliases() {
-	fmt.Print(`
-alias a='fasder'
-alias d='fasder -d'
-alias f='fasder -f'
-fasder_cd() {
-  if [ $# -le 1 ]; then
-    fasder -l "$@"
-  else
-    local _fasder_ret="$(fasder -e 'printf %s' "$@")"
-    [ -z "$_fasder_ret" ] && return
-    [ -d "$_fasder_ret" ] && cd "$_fasder_ret" || printf %s\n "$_fasder_ret"
-  fi
+	basics := `
+    alias a='fasder'
+    alias d='fasder -d'
+    alias f='fasder -f'
+  `
+
+	fz := `
+    fz() {
+      local dir
+      dir="$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m)" && cd "${dir}" || return 1
+    }
+  `
+
+	fasderCd := `
+    fasder_cd() {
+      if [ $# -le 1 ]; then
+        fasder -l "$@"
+      else
+        local _fasder_ret="$(fasder -e 'printf %s' "$@")"
+        [ -z "$_fasder_ret" ] && return
+        [ -d "$_fasder_ret" ] && cd "$_fasder_ret" || printf %s\n "$_fasder_ret"
+      fi
+    }
+    alias z='fasder_cd -d'
+  `
+
+	// # j - same as z, but if no arguments, jump to previous directory
+	j := `
+    j() {
+      if [ "$#" -gt 0 ]; then
+        fasder_cd -d $1
+      else
+        cd -
+      fi
+    }
+  `
+
+	fmt.Println(basics)
+	fmt.Println(fasderCd)
+	fmt.Println(fz)
+	fmt.Println(j)
 }
-alias z='fasder_cd -d'
-  `)
+
+func fzfAliases() {
+	jj := `
+    jj() {
+      local dir
+      dir="$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m)" && cd "${dir}" || return 1
+    }
+  `
+
+	fmt.Println(jj)
 }
