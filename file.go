@@ -23,11 +23,11 @@ type ByFrequencyThenRecency []FileEntry
 func (a ByFrequencyThenRecency) Len() int      { return len(a) }
 func (a ByFrequencyThenRecency) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a ByFrequencyThenRecency) Less(i, j int) bool {
-	// Sort by frequency (descending), then by last accessed (descending)
+	// Sort by frequency (ascending), then by last accessed (ascending)
 	if a[i].Frequency != a[j].Frequency {
-		return a[i].Frequency > a[j].Frequency
+		return a[i].Frequency < a[j].Frequency
 	}
-	return a[i].LastAccessed > (a[j].LastAccessed)
+	return a[i].LastAccessed < (a[j].LastAccessed)
 }
 
 func sortEntries(entries []FileEntry) []FileEntry {
