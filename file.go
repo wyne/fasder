@@ -65,7 +65,8 @@ func fuzzyFind(entries []FileEntry, searchTerm string, filesOnly bool, dirsOnly 
 
 		var paths []string
 		for _, entry := range entries {
-			paths = append(paths, entry.Path)
+			parts := strings.Split(entry.Path, "/")
+			paths = append(paths, parts[len(parts)-1])
 		}
 
 		// Perform fuzzy search
@@ -104,14 +105,11 @@ func filterEntries(entries []FileEntry, files bool, dirs bool) []FileEntry {
 
 func execute(entries []FileEntry, command string) {
 	if len(entries) > 0 {
-		topEntry := entries[len(entries)-1]
+		bestMatch := entries[len(entries)-1]
 		// Execute the specified command on the top entry
-		cmdStr := fmt.Sprintf("%s %s", command, topEntry.Path)
+		cmdStr := fmt.Sprintf("%s %s", command, bestMatch.Path)
 		parts := strings.Split(cmdStr, " ")
-
-		logger.Log.Printf("executing command: %s. args: \n%s", parts[0], strings.Join(parts[1:], " "))
 		cmd := exec.Command(parts[0], parts[1:]...)
-
 		cmd.Stdout = os.Stdout
 		err := cmd.Run()
 		if err != nil {

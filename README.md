@@ -2,6 +2,8 @@
 
 This is a rewrite of [clvv/fasd](http://github.com/clvv/fasd) in go.
 
+![Demo](./demo.gif)
+
 ## Installation
 
 ```bash
@@ -38,3 +40,5 @@ alias v='f -e nvim'   # open best file match in nvim
 - [ ] Better ranking
   - [ ] Ranking decay
 - [ ] Remove from store on filtering
+- [ ] VHS Tapes
+- [ ] Brew Formulae
