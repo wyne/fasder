@@ -6,19 +6,10 @@ This is a rewrite of [clvv/fasd](http://github.com/clvv/fasd) in go.
 
 ```bash
 brew install wyne/tap/fasder
+echo 'eval "$(fasder --init auto)"' >> ~/.zshrc
 ```
 
-Setup just the zsh-hook by adding to your `.zshrc`:
-
-```bash
-eval "$(fasder --init zsh-hook)"
-```
-
-You can optionally enable the builtin aliases:
-
-```bash
-eval "$(fasder --init zsh-hook aliases)"
-```
+Built in aliases using `auto`:
 
 ```bash
 alias a='fasder'        # both files and directories
@@ -31,18 +22,13 @@ alias j='fasder_cd -d'  # cd to best match. ex: `z work` to cd to workspace
 FZF integration for quick selecting from a list
 
 ```bash
-eval "$(fasder --init zsh-hook aliases fzf-aliases)"
-```
-
-```bash
 alias jj='fasder_cd -d'  # cd to best match. ex: `z work` to cd to workspace
 ```
 
-## Usage
+## Custom Usage
 
 ```bash
-alias f='fasder -f' # files only
-alias v='f -e nvim' # open in nvim
+alias v='f -e nvim'   # open best file match in nvim
 ```
 
 # To-do

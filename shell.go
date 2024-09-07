@@ -7,29 +7,29 @@ import (
 // zshHook will setup a zshell hook to run and update based on commands
 func zshHook() {
 	fmt.Printf(`
-_fasder_preexec() {
-  { eval "fasder --proc $(fasder --sanitize $2)"; } >> /dev/null 2>&1
-}
-autoload -Uz add-zsh-hook
-add-zsh-hook preexec _fasder_preexec
-    `)
+    _fasder_preexec() {
+      { eval "fasder --proc $(fasder --sanitize $2)"; } >> /dev/null 2>&1
+    }
+    autoload -Uz add-zsh-hook
+    add-zsh-hook preexec _fasder_preexec
+  `)
 }
 
 func aliases() {
-	basics := `
+	fmt.Println(`
     alias a='fasder'
     alias d='fasder -d'
     alias f='fasder -f'
-  `
+  `)
 
-	fz := `
+	fmt.Println(`
     fz() {
       local dir
       dir="$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m)" && cd "${dir}" || return 1
     }
-  `
+  `)
 
-	fasderCd := `
+	fmt.Println(`
     fasder_cd() {
       if [ $# -le 1 ]; then
         fasder -l "$@"
@@ -40,10 +40,10 @@ func aliases() {
       fi
     }
     alias z='fasder_cd -d'
-  `
+  `)
 
 	// # j - same as z, but if no arguments, jump to previous directory
-	j := `
+	fmt.Println(`
     j() {
       if [ "$#" -gt 0 ]; then
         fasder_cd -d $1
@@ -51,21 +51,14 @@ func aliases() {
         cd -
       fi
     }
-  `
-
-	fmt.Println(basics)
-	fmt.Println(fasderCd)
-	fmt.Println(fz)
-	fmt.Println(j)
+  `)
 }
 
 func fzfAliases() {
-	jj := `
+	fmt.Println(`
     jj() {
       local dir
       dir="$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m)" && cd "${dir}" || return 1
     }
-  `
-
-	fmt.Println(jj)
+  `)
 }

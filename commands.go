@@ -14,6 +14,10 @@ import (
 func Init(args []string) {
 	for _, initializer := range args {
 		switch initializer {
+		case "auto":
+			zshHook()
+			aliases()
+			fzfAliases()
 		case "zsh-hook":
 			zshHook()
 		case "aliases":
