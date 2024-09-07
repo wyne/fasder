@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func LoadFileStore() {
@@ -69,4 +70,35 @@ func writeFileStore(entries []FileEntry) {
 			log.Fatal(err)
 		}
 	}
+}
+
+// AddToStore an entry to the store
+func AddToStore(path string) {
+	entries, err := readFileStore()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	found := false
+	for i, entry := range entries {
+		if entry.Path == path {
+			entries[i].Frequency++
+			entries[i].LastAccessed = time.Now().Unix()
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		// Add a new entry if the file hasn't been logged before
+		newEntry := FileEntry{
+			Path:         path,
+			Frequency:    1,
+			LastAccessed: time.Now().Unix(),
+		}
+		entries = append(entries, newEntry)
+	}
+
+	// Write updated entries back to the file
+	writeFileStore(entries)
 }

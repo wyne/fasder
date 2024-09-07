@@ -2,11 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/wyne/fasder/logger"
 )
@@ -23,19 +22,10 @@ func Init(args []string) {
 	}
 }
 
-// Process command from shell hooks
-func Proc(args []string) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		logger.Log.Println("Error getting working directory:", err)
-		return
-	}
-
-	logger.Log.Printf("Processing: %s, %s", cwd, args)
-}
-
 // Sanitize command from shell hooks before processing
 func Sanitize(args []string) {
+	logger.Log.Printf("--sanitize: %s", strings.Join(args, " "))
+
 	// Concatenate all arguments into a single string
 	input := strings.Join(args, " ")
 
@@ -51,33 +41,50 @@ func Sanitize(args []string) {
 	fmt.Printf("%s", input)
 }
 
-// Add an entry to the store
-func Add(path string) {
-	entries, err := readFileStore()
+// Process command from shell hooks
+func Proc(args []string) {
+	cwd, err := os.Getwd()
 	if err != nil {
-		log.Fatal(err)
+		logger.Log.Println("Error getting working directory:", err)
+		return
 	}
 
-	found := false
-	for i, entry := range entries {
-		if entry.Path == path {
-			entries[i].Frequency++
-			entries[i].LastAccessed = time.Now().Unix()
-			found = true
-			break
+	// TODO: ignores
+	// TODO: blacklists
+	// TODO: shifts?
+
+	logger.Log.Printf("--proc: %s %s", cwd, strings.Join(args, " "))
+
+	Add(fmt.Sprintf("%s %s", cwd, strings.Join(args, " ")))
+}
+
+func Add(args string) {
+	logger.Log.Printf("--add: %s", args)
+
+	var validPaths []string
+
+	// Iterate over the arguments and validate paths
+	for _, arg := range strings.Split(args, " ") {
+		if _, err := os.Stat(arg); err == nil {
+			validPaths = append(validPaths, arg)
 		}
 	}
 
-	if !found {
-		// Add a new entry if the file hasn't been logged before
-		newEntry := FileEntry{
-			Path:         path,
-			Frequency:    1,
-			LastAccessed: time.Now().Unix(),
+	// Convert paths to absolute form and simplify
+	var absolutePaths []string
+	for _, path := range validPaths {
+		absPath, err := filepath.Abs(path)
+		if err != nil {
+			fmt.Printf("Error converting path to absolute form: %v\n", err)
+			continue
 		}
-		entries = append(entries, newEntry)
+		// Simplify the path
+		cleanPath := filepath.Clean(absPath)
+		absolutePaths = append(absolutePaths, cleanPath)
 	}
 
-	// Write updated entries back to the file
-	writeFileStore(entries)
+	// Join paths with a '|'
+	result := strings.Join(absolutePaths, "|")
+
+	logger.Log.Printf("--add: Validated paths: %s", result)
 }

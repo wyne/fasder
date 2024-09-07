@@ -45,7 +45,7 @@ func main() {
 	}
 
 	if *add != "" {
-		Add(*add)
+		AddToStore(*add)
 		return
 	}
 
