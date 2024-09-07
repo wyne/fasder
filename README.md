@@ -18,3 +18,9 @@ eval "$(fasder --init zsh-hook)"
 alias f='fasder -f' # files only
 alias v='f -e nvim' # open in nvim
 ```
+
+# To-do
+
+- [ ] Increment score on execution with -e flag
+- [ ] Support more aliases
+- [ ] Better ranking
