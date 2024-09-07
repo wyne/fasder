@@ -1,3 +1,6 @@
+> [!WARNING]
+> This project is under very active development and likely to have breaking changes without warning.
+
 # fasder
 
 This is a rewrite of [clvv/fasd](http://github.com/clvv/fasd) in go.
