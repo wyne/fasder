@@ -41,4 +41,4 @@ alias v='f -e nvim'   # open best file match in nvim
 - [ ] Increment score on execution with -e flag
 - [ ] Better ranking
   - [ ] Ranking decay
-- [ ] Remove entries from db on filtering
+  - [ ] Remove entries from db on filtering

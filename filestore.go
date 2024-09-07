@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+var dataFile string
+
 func LoadFileStore() {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {

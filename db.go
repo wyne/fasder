@@ -12,10 +12,8 @@ import (
 	"github.com/wyne/fasder/logger"
 )
 
-var dataFile string
-
 // Struct to hold the file metadata
-type FileEntry struct {
+type PathEntry struct {
 	Path         string
 	Frequency    int
 	LastAccessed int64 // Unix timestamp
@@ -24,7 +22,7 @@ type FileEntry struct {
 // Sorting Methods
 
 type ByFrequencyThenRecency struct {
-	entries []FileEntry
+	entries []PathEntry
 	reverse bool
 }
 
@@ -49,15 +47,15 @@ func (a ByFrequencyThenRecency) Less(i, j int) bool {
 	}
 }
 
-func sortEntries(entries []FileEntry, reverse bool) []FileEntry {
+func sortEntries(entries []PathEntry, reverse bool) []PathEntry {
 	sort.Sort(ByFrequencyThenRecency{entries, reverse})
 	return entries
 }
 
 // Fuzzy search function
-func fuzzyFind(entries []FileEntry, searchTerm string, filesOnly bool, dirsOnly bool) []FileEntry {
+func fuzzyFind(entries []PathEntry, searchTerm string, filesOnly bool, dirsOnly bool) []PathEntry {
 	// Collect matching entries
-	var results []FileEntry
+	var results []PathEntry
 
 	if searchTerm == "" {
 		results = entries
@@ -81,9 +79,9 @@ func fuzzyFind(entries []FileEntry, searchTerm string, filesOnly bool, dirsOnly 
 }
 
 // Helper function to filter files or directories
-func filterEntries(entries []FileEntry, files bool, dirs bool) []FileEntry {
+func filterEntries(entries []PathEntry, files bool, dirs bool) []PathEntry {
 	logger.Log.Printf("Filtering files: %v, dirs: %v", files, dirs)
-	var filtered []FileEntry
+	var filtered []PathEntry
 
 	for _, entry := range entries {
 		info, err := os.Stat(entry.Path)
@@ -103,7 +101,7 @@ func filterEntries(entries []FileEntry, files bool, dirs bool) []FileEntry {
 	return filtered
 }
 
-func execute(entries []FileEntry, command string) {
+func execute(entries []PathEntry, command string) {
 	if len(entries) > 0 {
 		bestMatch := entries[len(entries)-1]
 		// Execute the specified command on the top entry
