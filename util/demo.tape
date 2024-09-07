@@ -8,7 +8,7 @@ Set FontSize 18
 Set Width 600
 Set Height 600
 
-# Hide
+Hide
 Type 'source util/tape-helper.sh'
 Enter
 Type "cd"
@@ -16,7 +16,7 @@ Enter
 Type "clear"
 Enter
 Sleep 500ms
-# Show
+Show
 
 Sleep 1s
 
