@@ -16,8 +16,8 @@ func Init(args []string) {
 		switch initializer {
 		case "zsh-hook":
 			zshHook()
-		default:
-			// fmt.Println("Unknown: ", initializer)
+		case "aliases":
+			aliases()
 		}
 	}
 }

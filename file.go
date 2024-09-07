@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"sort"
+	"strings"
 
 	"github.com/sahilm/fuzzy"
 	"github.com/wyne/fasder/logger"
@@ -91,8 +92,11 @@ func execute(entries []FileEntry, command string) {
 	if len(entries) > 0 {
 		topEntry := entries[len(entries)-1]
 		// Execute the specified command on the top entry
-		logger.Log.Printf("executing command: %s %s", command, topEntry.Path)
-		cmd := exec.Command(command, topEntry.Path)
+		cmdStr := fmt.Sprintf("%s %s", command, topEntry.Path)
+		parts := strings.Split(cmdStr, " ")
+
+		logger.Log.Printf("executing command: %s. args: \n%s", parts[0], strings.Join(parts[1:], " "))
+		cmd := exec.Command(parts[0], parts[1:]...)
 
 		cmd.Stdout = os.Stdout
 		err := cmd.Run()

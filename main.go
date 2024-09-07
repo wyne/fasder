@@ -20,6 +20,7 @@ func main() {
 	sanitize := flag.Bool("sanitize", false, "Sanitize command before processing")
 	proc := flag.Bool("proc", false, "Process a command")
 	execCmd := flag.String("e", "", "Command to open the top choice")
+	list := flag.Bool("l", false, "List only, no values")
 
 	filesOnly := flag.Bool("f", false, "Files only")
 	dirsOnly := flag.Bool("d", false, "Dirs only")
@@ -73,6 +74,6 @@ func main() {
 		// logFileAccess("/path/to/file1")
 	} else {
 		logger.Log.Printf("displaying... %v", filesOnly)
-		displaySortedEntries(sortedEntries)
+		displaySortedEntries(sortedEntries, *list)
 	}
 }
