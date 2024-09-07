@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func LoadStore() {
+func LoadFileStore() {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		// Silently return
@@ -23,7 +23,7 @@ func LoadStore() {
 
 // Reads the `.fasder` file and loads file entries into a slice
 
-func readFromStore() ([]FileEntry, error) {
+func readFileStore() ([]FileEntry, error) {
 	var entries []FileEntry
 	f, err := os.Open(dataFile)
 	if err != nil {
@@ -56,7 +56,7 @@ func readFromStore() ([]FileEntry, error) {
 	return entries, scanner.Err()
 }
 
-func writeToStore(entries []FileEntry) {
+func writeFileStore(entries []FileEntry) {
 	f, err := os.Create(dataFile) // Truncate and rewrite the file
 	if err != nil {
 		log.Fatal(err)

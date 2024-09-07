@@ -10,15 +10,29 @@ func main() {
 	// Implement command-line flags
 	search := flag.String("f", "", "Search for a file")
 	add := flag.String("add", "", "Add object to store")
+	init := flag.Bool("init", false, "Initializers: zsh-hook")
+	proc := flag.Bool("proc", false, "Process a command")
 	display := flag.Bool("display", false, "Display sorted file entries")
 	execCmd := flag.String("exec", "", "Command to open the top choice")
 
+	LoadFileStore()
+
 	flag.Parse()
 
-	LoadStore()
+	// Commands
+
+	if *init {
+		Init(flag.Args())
+		return
+	}
+
+	if *proc {
+		Proc(flag.Args())
+		return
+	}
 
 	if *add != "" {
-		logFileAccess(*add)
+		Add(*add)
 		return
 	}
 
@@ -32,7 +46,7 @@ func main() {
 	}
 
 	// Retrieve and display sorted entries
-	entries, err := readFromStore()
+	entries, err := readFileStore()
 	if err != nil {
 		log.Fatal(err)
 	}

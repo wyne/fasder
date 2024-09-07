@@ -5,7 +5,6 @@ import (
 	"log"
 	"os/exec"
 	"sort"
-	"time"
 )
 
 var dataFile string
@@ -14,7 +13,7 @@ var dataFile string
 type FileEntry struct {
 	Path         string
 	Frequency    int
-	LastAccessed int64
+	LastAccessed int64 // Unix timestamp
 }
 
 // Sorting Methods
@@ -37,7 +36,7 @@ func sortEntries(entries []FileEntry) []FileEntry {
 }
 
 func openTopChoice(command string) {
-	entries, err := readFromStore()
+	entries, err := readFileStore()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,34 +54,4 @@ func openTopChoice(command string) {
 	} else {
 		fmt.Println("No entries found.")
 	}
-}
-
-func logFileAccess(path string) {
-	entries, err := readFromStore()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	found := false
-	for i, entry := range entries {
-		if entry.Path == path {
-			entries[i].Frequency++
-			entries[i].LastAccessed = time.Now().Unix()
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		// Add a new entry if the file hasn't been logged before
-		newEntry := FileEntry{
-			Path:         path,
-			Frequency:    1,
-			LastAccessed: time.Now().Unix(),
-		}
-		entries = append(entries, newEntry)
-	}
-
-	// Write updated entries back to the file
-	writeToStore(entries)
 }
