@@ -1,3 +1,3 @@
-module github.com/yourusername/fasder
+module github.com/wyne/fasder
 
 go 1.23.0

@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"strings"
 	"time"
+
+	"github.com/wyne/fasder/logger"
 )
 
 // Initialization
@@ -21,11 +24,14 @@ func Init(args []string) {
 
 // Process command from shell hooks
 func Proc(args []string) {
-	fmt.Printf("Processing: %s", args)
+	logger.Logger.Printf("Processing: %s", args)
 }
 
 // Sanitize command from shell hooks before processing
-func Sanitize(input string) string {
+func Sanitize(args []string) {
+	// Concatenate all arguments into a single string
+	input := strings.Join(args, " ")
+
 	// First, handle the command substitution: `$(...)` becomes `...`
 	// This regex matches the command substitution and replaces it.
 	reCommandSubstitution := regexp.MustCompile(`([^\\])\$\([^\)]*\)`)
@@ -35,7 +41,7 @@ func Sanitize(input string) string {
 	reSpecialChars := regexp.MustCompile(`([^\\])[|&;<>$` + "`" + `{}]+`)
 	input = reSpecialChars.ReplaceAllString(input, "$1 ")
 
-	return input
+	fmt.Printf("%s", input)
 }
 
 // Add an entry to the store

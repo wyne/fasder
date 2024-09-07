@@ -4,13 +4,21 @@ import (
 	"flag"
 	"fmt"
 	"log"
+
+	"github.com/wyne/fasder/logger"
 )
 
+// Global variable to hold the logger
+var Logger *log.Logger
+
 func main() {
+	logger.InitLog()
+
 	// Implement command-line flags
 	search := flag.String("f", "", "Search for a file")
 	add := flag.String("add", "", "Add object to store")
 	init := flag.Bool("init", false, "Initializers: zsh-hook")
+	sanitize := flag.Bool("sanitize", false, "Sanitize command before processing")
 	proc := flag.Bool("proc", false, "Process a command")
 	display := flag.Bool("display", false, "Display sorted file entries")
 	execCmd := flag.String("exec", "", "Command to open the top choice")
@@ -23,6 +31,11 @@ func main() {
 
 	if *init {
 		Init(flag.Args())
+		return
+	}
+
+	if *sanitize {
+		Sanitize(flag.Args())
 		return
 	}
 
