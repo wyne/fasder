@@ -42,15 +42,23 @@ alias d='fasder -d'     # directories only
 alias f='fasder -f'     # files only
 ```
 
+Flags
+
+- `-l` will omit scores and only print paths
+- `-r` will reverse the list
+- `-e {cmd}` will execute {cmd} on the best match
+
 ```bash
 # Immediately open best match for query in $EDITOR
 # Example: v {query}
+# Leave query empty to open top ranked file from fasd -f
 alias v='f -e $EDITOR'  # open best file match in $EDITOR
 ```
 
 ```bash
 # Immediately cd to best match for query
 # Example: j {query}
+# Leave query empty to cd to top ranked dir from fasd -d
 j() {
   cd "$(fasder -e 'printf %s' "$1")" || return 1
 }
@@ -64,6 +72,7 @@ These aliases are installed with `auto` initializer or individually with
 ```bash
 # Interactive select from ranked files with fzf, then open in $EDITOR
 # Example: vv {query}
+# Leave query empty for full list
 vv () {
   local selection
   # Get the selection from fasder and fzf
@@ -90,6 +99,7 @@ vv () {
 ```bash
 # Interactive select from ranked files with fzf, then cd
 # Example: jj {query}
+# Leave query empty for full list
 jj () {
   local selection
   selection=$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m --height=10)

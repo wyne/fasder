@@ -14,13 +14,15 @@ var Logger *log.Logger
 func main() {
 	logger.InitLog()
 
-	// Implement command-line flags
-	add := flag.String("add", "", "Add object to store")
-	init := flag.Bool("init", false, "Initializers: zsh-hook")
-	sanitize := flag.Bool("sanitize", false, "Sanitize command before processing")
-	proc := flag.Bool("proc", false, "Process a command")
-	execCmd := flag.String("e", "", "Command to open the top choice")
-	list := flag.Bool("l", false, "List only, no values")
+	// Internal flags
+	add := flag.String("add", "", "Internal: Add path to the store")
+	sanitize := flag.Bool("sanitize", false, "Internal: Sanitize command before processing")
+	proc := flag.Bool("proc", false, "Internal: Process a zsh-hook command")
+
+	// User flags
+	init := flag.Bool("init", false, "Initialize fasder. Flags: zsh-hook aliases zsh-aliases, or auto for all  ")
+	execCmd := flag.String("e", "", "Execute provided command against best match")
+	list := flag.Bool("l", false, "List only. Omit rankings")
 	reverse := flag.Bool("r", false, "Reverse sort. Useful to pipe into fzf")
 
 	filesOnly := flag.Bool("f", false, "Files only")
