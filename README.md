@@ -5,6 +5,15 @@
 
 This is a rewrite of [clvv/fasd](http://github.com/clvv/fasd) in go.
 
+Fasder, pronounced like "faster" but with a d, offers quick access to commonly
+used files and directories. Fasder tracks the files and directories you access
+and ranks them based on usage. You can then use the built in commands or
+construct your own to reference them with minimal keystrokes.
+
+For example, once you've opened your zsh config once, you can then use something
+like `v .z` to immediately open `~/.zshrc` in neovim. See the aliases section
+below to see how this works.
+
 ![Demo](./demo.gif)
 
 ## Installation
@@ -20,44 +29,42 @@ Migrate from `fasd`:
 cp .fasd .fasder
 ```
 
-Built-in aliases using `auto`:
+## Usage
+
+### Built-in aliases and base commands
+
+These aliases are installed with `auto` initializer, or individually
+with `--init aliases`.
 
 ```bash
 alias a='fasder'        # both files and directories
 alias d='fasder -d'     # directories only
 alias f='fasder -f'     # files only
-alias z='fasder_cd -d'  # cd to best match. ex: `z work` to cd to workspace
-alias j='fasder_cd -d'  # cd to best match. ex: `z work` to cd to workspace
 ```
-
-FZF integration for quick selecting from a list
 
 ```bash
-alias jj='fasder_cd -d'  # cd to best match. ex: `z work` to cd to workspace
+alias v='f -e $EDITOR'  # open best file match in $EDITOR
+alias j='fasder_cd -d'  # cd to best match
 ```
 
-## Custom Usage
+### Interactive Selection - requires [fzf](https://github.com/junegunn/fzf)
 
-```bash
-alias v='f -e nvim'   # open best file match in nvim
-```
-
-# Advanced
+These aliases are installed with `auto` initializer or individually with
+`--init fzf-aliases`.
 
 ```bash
 # Search and select file with fzf, then execute with nvim
 # Example: vv zsh
-vv () {
-  local file
-  file="$(fasder -r -f -l "$1" | fzf -1 -0 --no-sort +m)"
-  [ -n "$file" ] && echo "$file" | xargs nvim
+vv() {
+  fasder -r -f -l "$1" | fzf -1 -0 --no-sort +m | xargs -r $EDITOR
 }
+```
 
-# Search and select dir with fzf, then execute with nvim
+```bash
+# Search and select dir with fzf, then cd
 # Example: jj work
-jj () {
-  local dir
-  dir="$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m)"  && cd "${dir}" || return 1
+jj() {
+  cd "$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m)" || return 1
 }
 ```
 

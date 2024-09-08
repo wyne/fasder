@@ -22,43 +22,23 @@ func aliases() {
     alias f='fasder -f'
   `)
 
-	fmt.Println(`
-    fz() {
-      local dir
-      dir="$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m)" && cd "${dir}" || return 1
-    }
-  `)
-
-	fmt.Println(`
-    fasder_cd() {
-      if [ $# -le 1 ]; then
-        fasder -l "$@"
-      else
-        local _fasder_ret="$(fasder -e 'printf %s' "$@")"
-        [ -z "$_fasder_ret" ] && return
-        [ -d "$_fasder_ret" ] && cd "$_fasder_ret" || printf %s\n "$_fasder_ret"
-      fi
-    }
-    alias z='fasder_cd -d'
-  `)
-
-	// # j - same as z, but if no arguments, jump to previous directory
+	// j - Jump to best match. If no arguments, jump to previous directory
 	fmt.Println(`
     j() {
-      if [ "$#" -gt 0 ]; then
-        fasder_cd -d $1
-      else
-        cd -
-      fi
-    }
+      cd "$(fasder -e 'printf %s' "$1")" || return 1
+    }  
   `)
 }
 
 func fzfAliases() {
 	fmt.Println(`
     jj() {
-      local dir
-      dir="$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m)" && cd "${dir}" || return 1
+      cd "$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m)" || return 1
+    }
+  `)
+	fmt.Println(`
+    vv() {
+      fasder -r -f -l "$1" | fzf -1 -0 --no-sort +m | xargs -r $EDITOR
     }
   `)
 }
