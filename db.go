@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/sahilm/fuzzy"
-	"github.com/wyne/fasder/logger"
 )
 
 // Struct to hold the file metadata
@@ -80,7 +79,6 @@ func fuzzyFind(entries []PathEntry, searchTerm string, filesOnly bool, dirsOnly 
 
 // Helper function to filter files or directories
 func filterEntries(entries []PathEntry, files bool, dirs bool) []PathEntry {
-	logger.Log.Printf("Filtering files: %v, dirs: %v", files, dirs)
 	var filtered []PathEntry
 
 	for _, entry := range entries {

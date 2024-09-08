@@ -30,8 +30,6 @@ func Init(args []string) {
 
 // Sanitize command from shell hooks before processing
 func Sanitize(args []string) {
-	// logger.Log.Printf("--sanitize: %s", strings.Join(args, " "))
-
 	// Concatenate all arguments into a single string
 	input := strings.Join(args, " ")
 
@@ -59,14 +57,10 @@ func Proc(args []string) {
 	// TODO: blacklists
 	// TODO: shifts?
 
-	// logger.Log.Printf("--proc: %s %s", cwd, strings.Join(args, " "))
-
 	Add(fmt.Sprintf("%s %s", cwd, strings.Join(args, " ")))
 }
 
 func Add(args string) {
-	// logger.Log.Printf("--add: %s", args)
-
 	var validPaths []string
 
 	// Iterate over the arguments and validate paths
@@ -92,9 +86,4 @@ func Add(args string) {
 	for _, path := range absolutePaths {
 		AddToStore(path)
 	}
-
-	// Join paths with a '|'
-	result := strings.Join(absolutePaths, "|")
-
-	logger.Log.Printf("--add paths: %s", result)
 }

@@ -57,26 +57,22 @@ func main() {
 		return
 	}
 
-	// Retrieve entries
-
+	// Read from file store
 	entries, err := readFileStore()
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Search
 	searchTerm := strings.Join(flag.Args(), " ")
-
-	logger.Log.Printf("searching.... %s", searchTerm)
+	logger.Log.Printf("Search term: %s", searchTerm)
 	matchingEntries := fuzzyFind(entries, searchTerm, files, dirs)
-
 	sortedEntries := sortEntries(matchingEntries, *reverse)
 
+	// Execute if necessary
 	if *execCmd != "" {
-		// Open the top choice with the specified command if -exec is set
 		execute(sortedEntries, *execCmd)
-		// logFileAccess("/path/to/file1")
 	} else {
-		logger.Log.Printf("displaying... %v", filesOnly)
 		displaySortedEntries(sortedEntries, *list)
 	}
 }
