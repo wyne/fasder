@@ -11,7 +11,7 @@ and ranks them based on usage. You can then use the built in commands or
 construct your own to reference them with minimal keystrokes.
 
 For example, once you've opened your zsh config once, you can then use something
-like `v .z` to immediately open `~/.zshrc` in neovim. See the aliases section
+like `v .z` or `v zsh` to immediately run `nvim ~/.zshrc`. See the aliases section
 below to see how this works.
 
 ![Demo](./demo.gif)
@@ -29,9 +29,18 @@ Migrate from `fasd`:
 cp .fasd .fasder
 ```
 
+## Getting started
+
+```bash
+j foo       # cd into highest ranked directory matching foo
+jj foo      # interactive select directories matching foo, then cd
+v foo       # open highest ranked file matching foo with $EDITOR
+vv foo      # interactive select files matching foo, then open with $EDITOR
+```
+
 ## Usage
 
-### Basic commands
+### Base commands
 
 These commands will query the database or show the full database when no
 query is provided. Results are ranked by usage.
@@ -123,6 +132,8 @@ jj () {
   fi
 }
 ```
+
+## Compared to `zoxide`
 
 # Features
 
