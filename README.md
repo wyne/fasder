@@ -91,9 +91,15 @@ These aliases are installed with `auto` initializer or individually with
 
 ```bash
 # Interactive select from ranked files with fzf, then open in $EDITOR
-# Example: vv {query}
 # Leave query empty for full list
-vv () {
+vv foo
+```
+
+<details>
+<summary>`vv()` source</summary>
+
+```bash
+vv() {
   local selection
   # Get the selection from fasder and fzf
   selection=$(fasder -r -f -l "$1" | fzf -1 -0 --no-sort +m --height=10)
@@ -115,6 +121,8 @@ vv () {
   fi
 }
 ```
+
+</details>
 
 ```bash
 # Interactive select from ranked files with fzf, then cd
@@ -180,5 +188,3 @@ one large shell script which is difficult to read and maintain.
   - [ ] `-B` additional backend
   - [ ] `-s` scores
   - [ ] `-i` interactive
-  - [ ] `-r` match by rank only
-- [ ] Detect subshell and apply `-l`, or require `-s` for scores
