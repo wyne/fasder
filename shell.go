@@ -20,6 +20,7 @@ func aliases() {
     alias a='fasder'
     alias d='fasder -d'
     alias f='fasder -f'
+    alias v='f -e $EDITOR'
   `)
 
 	// j - Jump to best match. If no arguments, jump to previous directory

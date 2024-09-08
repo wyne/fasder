@@ -43,8 +43,17 @@ alias f='fasder -f'     # files only
 ```
 
 ```bash
+# Immediately open best match for query in $EDITOR
+# Example: v {query}
 alias v='f -e $EDITOR'  # open best file match in $EDITOR
-alias j='fasder_cd -d'  # cd to best match
+```
+
+```bash
+# Immediately cd to best match for query
+# Example: j {query}
+j() {
+  cd "$(fasder -e 'printf %s' "$1")" || return 1
+}
 ```
 
 ### Interactive Selection - requires [fzf](https://github.com/junegunn/fzf)
@@ -53,16 +62,16 @@ These aliases are installed with `auto` initializer or individually with
 `--init fzf-aliases`.
 
 ```bash
-# Search and select file with fzf, then execute with nvim
-# Example: vv zsh
+# Interactive select from ranked files with fzf, then open in $EDITOR
+# Example: vv {query}
 vv() {
   fasder -r -f -l "$1" | fzf -1 -0 --no-sort +m | xargs -r $EDITOR
 }
 ```
 
 ```bash
-# Search and select dir with fzf, then cd
-# Example: jj work
+# Interactive select from ranked files with fzf, then cd
+# Example: jj {query}
 jj() {
   cd "$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m)" || return 1
 }
@@ -79,4 +88,4 @@ jj() {
   - [x] Shell hook to rank during normal operations
   - [x] Increment score on execution with -e flag
   - [ ] Decay
-  - [ ] Remove entries from db on filtering
+  - [ ] Remove entries from file store on filtering
