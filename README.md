@@ -119,6 +119,8 @@ jj () {
 - [ ] Shell Support
   - [x] zsh
   - [ ] bash
+  - [ ] tcsh
+  - [ ] autocomplete
 - [x] Aliases
 - [ ] Ranking
   - [x] Shell hook to rank during normal operations
@@ -126,3 +128,20 @@ jj () {
   - [x] Decay
   - [ ] Remove entries from file store on filtering
   - [ ] Full path search. Ex: {dir substr} {file substr}
+- [ ] Backends
+  - [ ] `fasd` format in `~/.fasder`
+  - [ ] viminfo
+  - [ ] spotlight
+  - [ ] recently used
+- [ ] Flags
+  - [x] `-r` reverse
+  - [x] `-l` list paths without ranks
+  - [x] `-f` files
+  - [x] `-e` execute
+  - [ ] `-t` recent access only
+  - [ ] `-[0-9]` nth entry
+  - [ ] `-b` only use backend
+  - [ ] `-B` additional backend
+  - [ ] `-s` scores
+  - [ ] `-i` interactive
+  - [ ] `-r` match by rank only
