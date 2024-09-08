@@ -62,6 +62,22 @@ func readFileStore() ([]PathEntry, error) {
 }
 
 func writeFileStore(entries []PathEntry) {
+	var cumulativeRank float64
+	for _, entry := range entries {
+		cumulativeRank += entry.Rank
+	}
+
+	// Apply decay if cumulative rank exceeds threshold
+	const threshold = 2000.0
+	const decayFactor = 0.9
+
+	if cumulativeRank > threshold {
+		logger.Log.Println("Rank threshold met. Decaying...")
+		for i := range entries {
+			entries[i].Rank *= decayFactor
+		}
+	}
+
 	f, err := os.Create(dataFile) // Truncate and rewrite the file
 	if err != nil {
 		log.Fatal(err)
@@ -87,7 +103,8 @@ func AddToStore(path string) {
 	for i, entry := range entries {
 		if entry.Path == path {
 			logger.Log.Printf(
-				"Old rank: %v, new rank: %v",
+				"Adding path: %s %v->%v",
+				path,
 				entries[i].Rank,
 				entries[i].Rank+1/entries[i].Rank,
 			)

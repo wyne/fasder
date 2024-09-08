@@ -123,6 +123,6 @@ jj () {
 - [ ] Ranking
   - [x] Shell hook to rank during normal operations
   - [x] Increment score on execution with -e flag
-  - [ ] Decay
+  - [x] Decay
   - [ ] Remove entries from file store on filtering
   - [ ] Full path search. Ex: {dir substr} {file substr}
