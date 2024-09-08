@@ -1,5 +1,5 @@
 > [!WARNING]
-> This project is under very active development and likely to have breaking changes without warning.
+> This project is under active development and may have breaking changes without warning.
 
 # fasder
 
@@ -42,12 +42,34 @@ alias jj='fasder_cd -d'  # cd to best match. ex: `z work` to cd to workspace
 alias v='f -e nvim'   # open best file match in nvim
 ```
 
-# To-do
+# Advanced
 
-- [x] Support more aliases
-- [x] VHS Tapes
+```bash
+# Search and select file with fzf, then execute with nvim
+# Example: vv zsh
+vv () {
+  local file
+  file=$(find ${1:-.} -type f 2> /dev/null | fzf +m)
+  [ -n "$file" ] && ${EDITOR:-nvim} "$file"
+}
+
+# Search and select dir with fzf, then execute with nvim
+# Example: jj work
+jj () {
+  local dir
+  dir="$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m)"  && cd "${dir}" || return 1
+}
+```
+
+# Features
+
 - [x] Brew Formulae (`brew install wyne/tap/fasder`)
-- [ ] Better ranking
+- [ ] Shell Support
+  - [x] zsh
+  - [ ] bash
+- [x] Aliases
+- [ ] Ranking
+  - [x] Shell hook to rank during normal operations
   - [x] Increment score on execution with -e flag
-  - [ ] Ranking decay
+  - [ ] Decay
   - [ ] Remove entries from db on filtering
