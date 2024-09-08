@@ -14,7 +14,13 @@ brew install wyne/tap/fasder
 echo 'eval "$(fasder --init auto)"' >> ~/.zshrc
 ```
 
-Built in aliases using `auto`:
+Migrate from `fasd`:
+
+```bash
+cp .fasd .fasder
+```
+
+Built-in aliases using `auto`:
 
 ```bash
 alias a='fasder'        # both files and directories
