@@ -89,15 +89,18 @@ j() {
 These aliases are installed with `auto` initializer or individually with
 `--init fzf-aliases`.
 
+#### vv - quick edit from list
+
 ```bash
 vv foo  # Interactive select from ranked files with fzf, then open in $EDITOR
 vv      # Leave query empty to select from full file list
 ```
 
 <details>
-<summary>Source</summary>
+  <summary>Source</summary>
 
 > ```bash
+> # Interactive edit from list
 > vv() {
 >   local selection
 >   # Get the selection from fasder and fzf
@@ -123,22 +126,32 @@ vv      # Leave query empty to select from full file list
 
 </details>
 
+#### jj - quick jump from list
+
 ```bash
-# Interactive select from ranked files with fzf, then cd
-# Example: jj {query}
-# Leave query empty for full list
-jj () {
-  local selection
-  selection=$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m --height=10)
-  if [[ -n "$selection" ]]; then
-    echo "Selection: $selection"
-    cd "$selection" || return 1
-  else
-    echo "No selection made"
-    return 1
-  fi
-}
+jj foo  # Interactive select from ranked files with fzf, then cd
+jj      # Leave query empty to select from full directory list
 ```
+
+<details>
+  <summary>Source</summary>
+
+> ```bash
+> # Interactive cd from list
+> jj () {
+>   local selection
+>   selection=$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m --height=10)
+>   if [[ -n "$selection" ]]; then
+>     echo "Selection: $selection"
+>     cd "$selection" || return 1
+>   else
+>     echo "No selection made"
+>     return 1
+>   fi
+> }
+> ```
+
+</details>
 
 ## Compared to `zoxide`
 
