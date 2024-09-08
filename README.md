@@ -31,7 +31,24 @@ cp .fasd .fasder
 
 ## Usage
 
-### Built-in aliases and base commands
+### Basic commands
+
+These commands will query the database or show the full database when no
+query is provided. Results are ranked by usage.
+
+```bash
+fasder        # both files and directories
+fasder -d     # directories only
+fasder -f     # files only
+```
+
+Flags
+
+- `-l` omit scores and only print paths. Useful for piping into other tools
+- `-r` reverse the list
+- `-e {cmd}` execute {cmd} on the best match
+
+### Aliases
 
 These aliases are installed with `auto` initializer, or individually
 with `--init aliases`.
@@ -41,12 +58,6 @@ alias a='fasder'        # both files and directories
 alias d='fasder -d'     # directories only
 alias f='fasder -f'     # files only
 ```
-
-Flags
-
-- `-l` will omit scores and only print paths
-- `-r` will reverse the list
-- `-e {cmd}` will execute {cmd} on the best match
 
 ```bash
 # Immediately open best match for query in $EDITOR
@@ -64,7 +75,7 @@ j() {
 }
 ```
 
-### Interactive Selection - requires [fzf](https://github.com/junegunn/fzf)
+### Interactive Aliases - requires [fzf](https://github.com/junegunn/fzf)
 
 These aliases are installed with `auto` initializer or individually with
 `--init fzf-aliases`.
@@ -129,7 +140,7 @@ jj () {
   - [ ] Remove entries from file store on filtering
   - [ ] Full path search. Ex: {dir substr} {file substr}
 - [ ] Backends
-  - [ ] `fasd` format in `~/.fasder`
+  - [x] `fasd` format in `~/.fasder`
   - [ ] viminfo
   - [ ] spotlight
   - [ ] recently used
