@@ -104,6 +104,10 @@ func filterEntries(entries []PathEntry, files bool, dirs bool) []PathEntry {
 func execute(entries []PathEntry, command string) {
 	if len(entries) > 0 {
 		bestMatch := entries[len(entries)-1]
+
+		// Increment rank
+		Add(bestMatch.Path)
+
 		// Execute the specified command on the top entry
 		cmdStr := fmt.Sprintf("%s %s", command, bestMatch.Path)
 		parts := strings.Split(cmdStr, " ")
