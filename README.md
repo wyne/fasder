@@ -149,19 +149,21 @@ one large shell script which is difficult to read and maintain.
 # Features
 
 - [x] Brew Formulae (`brew install wyne/tap/fasder`)
+- [x] Aliases
 - [ ] man page
 - [ ] Shell Support
   - [x] zsh
     - [ ] autocomplete
   - [ ] bash
   - [ ] tcsh
-- [x] Aliases
 - [ ] Ranking
   - [x] Shell hook to rank during normal operations
   - [x] Increment score on execution with -e flag
   - [x] Decay
   - [ ] Remove entries from file store on filtering
-  - [ ] Full path search. Ex: {dir substr} {file substr}
+- [ ] Matching
+  - [x] Last segment matching
+  - [ ] Full path matching. Ex: {dir substr} {file substr} ([ref](https://github.com/clvv/fasd?tab=readme-ov-file#matching))
 - [ ] Backends
   - [x] `fasd` format in `~/.fasder`
   - [ ] viminfo
@@ -179,3 +181,4 @@ one large shell script which is difficult to read and maintain.
   - [ ] `-s` scores
   - [ ] `-i` interactive
   - [ ] `-r` match by rank only
+- [ ] Detect subshell and apply `-l`, or require `-s` for scores
