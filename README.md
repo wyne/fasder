@@ -135,14 +135,26 @@ jj () {
 
 ## Compared to `zoxide`
 
+[zoxide](https://github.com/ajeetdsouza/zoxide) only works on directories.
+`Fasder` also works on files, allowing you to quickly access commonly used files as well.
+
+## Compared to `fasd`
+
+[clvv/fasd](http://github.com/clvv/fasd), the inspiration for `fasder`, has been
+archived and no longer has a Brew formulae. Additionally, it was written as
+one large shell script which is difficult to read and maintain.
+
+`fasder` is written in a modern language that is easy to adapt.
+
 # Features
 
 - [x] Brew Formulae (`brew install wyne/tap/fasder`)
+- [ ] man page
 - [ ] Shell Support
   - [x] zsh
+    - [ ] autocomplete
   - [ ] bash
   - [ ] tcsh
-  - [ ] autocomplete
 - [x] Aliases
 - [ ] Ranking
   - [x] Shell hook to rank during normal operations
