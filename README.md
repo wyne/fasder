@@ -49,8 +49,8 @@ alias v='f -e nvim'   # open best file match in nvim
 # Example: vv zsh
 vv () {
   local file
-  file=$(find ${1:-.} -type f 2> /dev/null | fzf +m)
-  [ -n "$file" ] && ${EDITOR:-nvim} "$file"
+  file="$(fasder -r -f -l "$1" | fzf -1 -0 --no-sort +m)"
+  [ -n "$file" ] && echo "$file" | xargs nvim
 }
 
 # Search and select dir with fzf, then execute with nvim
