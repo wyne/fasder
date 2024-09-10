@@ -11,7 +11,7 @@ and ranks them based on usage. You can then use the built in commands or
 construct your own to reference them with minimal keystrokes.
 
 For example, once you've opened your zsh config once, you can then use something
-like `v .z` or `v zsh` to immediately run `nvim ~/.zshrc`. See the aliases section
+like `v zsh` or `v .z` to immediately run `nvim ~/.zshrc`. See the aliases section
 below to see how this works.
 
 ![Demo](./demo.gif)
@@ -186,7 +186,10 @@ one large shell script which is difficult to read and maintain.
   - [ ] Full path matching. Ex: {dir substr} {file substr} ([ref](https://github.com/clvv/fasd?tab=readme-ov-file#matching))
 - [ ] Backends
   - [x] `fasd` format in `~/.fasder`
-  - [ ] viminfo
+  - [x] neovim
+    - [x] plugin [fasder.nvim](https://github.com/wyne/fasder.nvim)
+    - [ ] shada
+  - [ ] vim - viminfo
   - [ ] spotlight
   - [ ] recently used
 - [ ] Flags
