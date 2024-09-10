@@ -12,7 +12,7 @@ func displaySortedEntries(entries []PathEntry, list bool) {
 			fmt.Println(entry.Path)
 		} else {
 			fmt.Printf(
-				"%.5f\t%s\n",
+				"%-11.5f%s\n",
 				entry.Rank,
 				entry.Path)
 		}
