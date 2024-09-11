@@ -23,8 +23,9 @@ func main() {
 	version := flag.Bool("v", false, "View version")
 	init := flag.Bool("init", false, "Initialize fasder. Flags: zsh-hook aliases zsh-aliases, or auto for all  ")
 	execCmd := flag.String("e", "", "Execute provided command against best match")
-	list := flag.Bool("l", false, "List only. Omit rankings")
+	// list := flag.Bool("l", false, "List only. Omit rankings")
 	reverse := flag.Bool("r", false, "Reverse sort. Useful to pipe into fzf")
+	scores := flag.Bool("s", false, "Show rank scores")
 
 	filesOnly := flag.Bool("f", false, "Files only")
 	dirsOnly := flag.Bool("d", false, "Dirs only")
@@ -79,6 +80,6 @@ func main() {
 	if *execCmd != "" {
 		execute(sortedEntries, *execCmd)
 	} else {
-		displaySortedEntries(sortedEntries, *list)
+		displaySortedEntries(sortedEntries, !*scores)
 	}
 }
