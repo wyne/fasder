@@ -38,6 +38,15 @@ v foo       # open highest ranked file matching foo with $EDITOR
 vv foo      # interactive select files matching foo, then open with $EDITOR
 ```
 
+```bash
+v def conf       # =>     vim /some/awkward/path/to/type/default.conf
+j abc            # =>     cd /an/awkward/path/to/get/to/abcdef
+m movie          # =>     mplayer /whatever/whatever/whatever/awesome_movie.mp4
+o eng paper      # =>     xdg-open /you/dont/remember/where/english_paper.pdf
+vim `f rc lo`    # =>     vim /etc/rc.local
+vim `f rc conf`  # =>     vim /etc/rc.conf
+```
+
 ## Usage
 
 ### Base commands
@@ -53,7 +62,7 @@ fasder -f     # files only
 
 Flags
 
-- `-l` omit scores and only print paths. Useful for piping into other tools
+- `-s` show rank scores
 - `-r` reverse the list
 - `-e {cmd}` execute {cmd} on the best match
 
@@ -108,7 +117,7 @@ vv      # Leave query empty to select from full file list
 > vv() {
 >   local selection
 >   # Get the selection from fasder and fzf
->   selection=$(fasder -r -f -l "$1" | fzf -1 -0 --no-sort +m --height=10)
+>   selection=$(fasder -r -f "$1" | fzf -1 -0 --no-sort +m --height=10)
 >
 >   # Check if a selection was made
 >   if [[ -n "$selection" ]]; then
@@ -144,7 +153,7 @@ jj      # Leave query empty to select from full directory list
 > # Interactive cd from list
 > jj () {
 >   local selection
->   selection=$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m --height=10)
+>   selection=$(fasder -r -d "$1" | fzf -1 -0 --no-sort +m --height=10)
 >   if [[ -n "$selection" ]]; then
 >     echo "Selection: $selection"
 >     cd "$selection" || return 1
@@ -198,12 +207,11 @@ one large shell script which is difficult to read and maintain.
   - [ ] recently used
 - [ ] Flags
   - [x] `-r` reverse
-  - [x] `-l` list paths without ranks
+  - [x] `-s` show rank scores
   - [x] `-f` files
   - [x] `-e` execute
   - [ ] `-t` recent access only
   - [ ] `-[0-9]` nth entry
   - [ ] `-b` only use backend
   - [ ] `-B` additional backend
-  - [ ] `-s` scores
   - [ ] `-i` interactive
