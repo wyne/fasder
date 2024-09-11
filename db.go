@@ -59,21 +59,47 @@ func fuzzyFind(entries []PathEntry, searchTerm string, filesOnly bool, dirsOnly 
 	if searchTerm == "" {
 		results = entries
 	} else {
+		var pathEndSegments []string
+		var pathFirstSegments []string
 
-		var paths []string
+		// Split search term by spaces
+		searchTerms := strings.Split(searchTerm, " ")
+
+		// Prepare paths and segments
 		for _, entry := range entries {
 			parts := strings.Split(entry.Path, "/")
-			paths = append(paths, parts[len(parts)-1])
+			pathEndSegments = append(pathEndSegments, parts[len(parts)-1])                         // Last segment
+			pathFirstSegments = append(pathFirstSegments, strings.Join(parts[:len(parts)-1], "/")) // First part of path
 		}
 
-		// Perform fuzzy search
-		matches := fuzzy.Find(searchTerm, paths)
+		var matches fuzzy.Matches
+		if len(searchTerms) > 1 {
+			searchTermStart := strings.Join(searchTerms[:len(searchTerms)-1], "")
+			searchTermEnd := searchTerms[len(searchTerms)-1]
 
-		for _, match := range matches {
-			results = append(results, entries[match.Index])
+			// Fuzzy match first term in first part of path and second term in last segment
+			leadingTermMatches := fuzzy.Find(searchTermStart, pathFirstSegments) // First part matching
+			endTermMatches := fuzzy.Find(searchTermEnd, pathEndSegments)         // Last segment matching
+
+			// Set results to paths that match both leadingTermMatches and endTermMatches
+			for _, leadingMatch := range leadingTermMatches {
+				for _, endMatch := range endTermMatches {
+					if leadingMatch.Index == endMatch.Index { // Both match the same path
+						results = append(results, entries[leadingMatch.Index])
+					}
+				}
+			}
+
+		} else {
+			// Perform fuzzy search on the last segment only (default behavior)
+			matches = fuzzy.Find(searchTerms[0], pathEndSegments)
+			for _, match := range matches {
+				results = append(results, entries[match.Index])
+			}
 		}
 	}
 
+	// Filter results based on file/dir-only flags
 	return filterEntries(results, filesOnly, dirsOnly)
 }
 

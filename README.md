@@ -187,7 +187,7 @@ one large shell script which is difficult to read and maintain.
   - [ ] Remove entries from file store on filtering
 - [ ] Matching
   - [x] Last segment matching
-  - [ ] Full path matching. Ex: {dir substr} {file substr} ([ref](https://github.com/clvv/fasd?tab=readme-ov-file#matching))
+  - [x] Full path matching. Ex: {dir substr} {file substr} ([ref](https://github.com/clvv/fasd?tab=readme-ov-file#matching))
 - [ ] Backends
   - [x] `fasd` format in `~/.fasder`
   - [x] neovim
