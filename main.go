@@ -20,6 +20,7 @@ func main() {
 	proc := flag.Bool("proc", false, "Internal: Process a zsh-hook command")
 
 	// User flags
+	version := flag.Bool("v", false, "View version")
 	init := flag.Bool("init", false, "Initialize fasder. Flags: zsh-hook aliases zsh-aliases, or auto for all  ")
 	execCmd := flag.String("e", "", "Execute provided command against best match")
 	list := flag.Bool("l", false, "List only. Omit rankings")
@@ -36,6 +37,11 @@ func main() {
 	LoadFileStore()
 
 	// Commands
+
+	if *version {
+		println("0.1.3")
+		return
+	}
 
 	if *init {
 		Init(flag.Args())
