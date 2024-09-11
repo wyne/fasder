@@ -78,9 +78,13 @@ alias v='f -e $EDITOR'  # open best file match in $EDITOR
 ```bash
 # Immediately cd to best match for query
 # Example: j {query}
-# Leave query empty to cd to top ranked dir from fasd -d
+# Leave query empty to cd previous directory (cd -)
 j() {
-  cd "$(fasder -e 'printf %s' "$1")" || return 1
+  if [ "$#" -gt 0 ]; then
+    cd "$(fasder -e 'printf %s' "$1")" || return 1
+  else
+    cd -
+  fi
 }
 ```
 
