@@ -52,7 +52,7 @@ func sortEntries(entries []PathEntry, reverse bool) []PathEntry {
 }
 
 // Fuzzy find function that matches the search terms to the paths
-func fuzzyFind(entries []PathEntry, searchTerm string, filesOnly bool, dirsOnly bool) []PathEntry {
+func fuzzyFind(entries []PathEntry, searchTerm string) []PathEntry {
 	// Collect matching entries
 	var results []PathEntry
 
@@ -74,8 +74,7 @@ func fuzzyFind(entries []PathEntry, searchTerm string, filesOnly bool, dirsOnly 
 		}
 	}
 
-	// Filter results based on file/dir-only flags (not implemented in this example)
-	return filterEntries(results, filesOnly, dirsOnly)
+	return results
 }
 
 // Split the path into segments using both `/` and `.` as delimiters
@@ -101,20 +100,44 @@ func splitPath(path string) []string {
 // Check if the search terms match the path segments in order
 func fuzzyMatchInOrder(searchTerms []string, pathSegments []string) bool {
 	searchIndex := 0
+	pathLength := len(pathSegments)
 
-	for _, pathSegment := range pathSegments {
-		// Use fuzzy.Find to check for fuzzy matches between the search term and path segment
-		matches := fuzzy.Find(searchTerms[searchIndex], []string{pathSegment})
+	if pathLength == 0 {
+		return false
+	}
+
+	// Match each search term with the corresponding path segment
+	for i := 0; i < len(searchTerms)-1; i++ {
+		if searchIndex >= len(pathSegments) {
+			return false
+		}
+
+		// Use fuzzy.Find to check for fuzzy matches between the current search term and the current path segment
+		matches := fuzzy.Find(searchTerms[i], []string{pathSegments[searchIndex]})
 		if len(matches) > 0 {
 			searchIndex++
 		}
-		// If we've matched all search terms, return true
-		if searchIndex == len(searchTerms) {
+	}
+
+	// Ensure that the last search term matches the last or second-to-last path segment
+	lastSearchTerm := searchTerms[len(searchTerms)-1]
+	if searchIndex < len(pathSegments) {
+		// Last segment match
+		lastSegmentMatches := fuzzy.Find(lastSearchTerm, []string{pathSegments[len(pathSegments)-1]})
+		if len(lastSegmentMatches) > 0 {
 			return true
 		}
 	}
 
-	// If we didn't match all search terms, return false
+	if len(pathSegments) > 1 && searchIndex <= len(pathSegments)-2 {
+		// Second-to-last segment match if available
+		secondLastSegmentMatches := fuzzy.Find(lastSearchTerm, []string{pathSegments[len(pathSegments)-2]})
+		if len(secondLastSegmentMatches) > 0 {
+			return true
+		}
+	}
+
+	// If all terms matched but last term didn’t match the end segments correctly
 	return false
 }
 

@@ -72,8 +72,9 @@ func main() {
 	// Search
 	searchTerm := strings.Join(flag.Args(), " ")
 	logger.Log.Printf("Search term: %s", searchTerm)
-	matchingEntries := fuzzyFind(entries, searchTerm, files, dirs)
-	sortedEntries := sortEntries(matchingEntries, *reverse)
+	matchingEntries := fuzzyFind(entries, searchTerm)
+	filteredEntries := filterEntries(matchingEntries, files, dirs)
+	sortedEntries := sortEntries(filteredEntries, *reverse)
 
 	// Execute if necessary
 	if *execCmd != "" {
