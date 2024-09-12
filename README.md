@@ -18,29 +18,118 @@ below to see how this works.
 
 ## Installation
 
+Bare installation (create your own aliases):
+
 ```bash
 brew install wyne/tap/fasder
 echo 'eval "$(fasder --init auto)"' >> ~/.zshrc
 ```
 
+With default aliases `f`, `a`, `d`, `v`, `vv`, `j`, `jj` (see [aliases](#aliases)):
+
+```bash
+brew install wyne/tap/fasder
+echo 'eval "$(fasder --init auto aliases)"' >> ~/.zshrc
+```
+
 Migrate from `fasd`:
 
 ```bash
-cp .fasd .fasder
+cp ~/.fasd ~/.fasder
 ```
 
 ## Getting started
 
 ```bash
-j foo       # cd into highest ranked directory matching foo
-jj foo      # interactive select directories matching foo, then cd
-v foo       # open highest ranked file matching foo with $EDITOR
-vv foo      # interactive select files matching foo, then open with $EDITOR
+v def conf      # =>    vim /some/awkward/path/to/type/default.conf
+j abc           # =>    cd /hell/of/a/awkward/path/to/get/to/abcdef
+m movie         # =>    mplayer /whatever/whatever/whatever/awesome_movie.mp4
+o eng paper     # =>    xdg-open /you/dont/remember/where/english_paper.pdf
+vim `f rc lo`   # =>    vim /etc/rc.local
+vim `f rc conf` # =>    vim /etc/rc.conf
+
+v zsh           # =>    vim /commonly/used/file/.zshrc
+vv foo          # =>    (interactive)
+j foo           # =>    cd /commonly/used/path/foo
+jj foo          # =>    (interactive)
+j               # =>    cd - (back to previous directory)
 ```
+
+The default `v` and `vv` commands use the `$EDITOR` var instead of vim. Ex: `export EDITOR=nvim`.
 
 ## Usage
 
-### Base commands
+### Aliases
+
+These aliases are installed by passing `aliases` as an init parameter.
+Example: `--init auto aliases`.
+
+```bash
+alias a='fasder'        # both files and directories
+alias d='fasder -d'     # directories only
+alias f='fasder -f'     # files only
+
+# Open best file match in $EDITOR
+# Example: v {query}
+alias v='f -e $EDITOR'
+
+# Immediately cd to best match for query
+# Example: j {query}
+# Leave query empty to cd previous directory (cd -)
+j() {
+  if [ "$#" -gt 0 ]; then
+    cd "$(fasder -e 'printf %s' "$1")" || return 1
+  else
+    cd -
+  fi
+}
+```
+
+These interactive aliases require [fzf](https://github.com/junegunn/fzf).
+
+```bash
+# Interactive edit from list. Requires fzf
+# Example: vv zsh     # Interactive select from ranked files with fzf, then open in $EDITOR
+# Example: vv         # Leave query empty to select from full file list                     #
+vv() {
+  local selection
+  # Get the selection from fasder and fzf
+  selection=$(fasder -r -f -l "$1" | fzf -1 -0 --no-sort +m --height=10)
+
+  # Check if a selection was made
+  if [[ -n "$selection" ]]; then
+      # Ensure the editor is set and handle potential issues
+      if [[ -z "$EDITOR" ]]; then
+          echo "EDITOR environment variable is not set."
+          return 1
+      fi
+
+      # Use xargs with -r to prevent running the editor if no selection
+      echo "Selection: $selection"
+      echo "$selection" | xargs -r "$EDITOR"
+  else
+      echo "No selection made."
+      return 1
+  fi
+}
+
+# Interactive cd from list
+# Example: jj foo     # Interactive select from ranked files with fzf, then cd
+# Example: jj         # Leave query empty to select from full directory list
+jj () {
+  local selection
+  selection=$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m --height=10)
+  if [[ -n "$selection" ]]; then
+    echo "Selection: $selection"
+    cd "$selection" || return 1
+  else
+    echo "No selection made"
+    return 1
+  fi
+}
+```
+
+## Base commands
 
 These commands will query the database or show the full database when no
 query is provided. Results are ranked by usage.
@@ -56,106 +145,6 @@ Flags
 - `-l` omit scores and only print paths. Useful for piping into other tools
 - `-r` reverse the list
 - `-e {cmd}` execute {cmd} on the best match
-
-### Aliases
-
-These aliases are installed with `auto` initializer, or individually
-with `--init aliases`.
-
-```bash
-alias a='fasder'        # both files and directories
-alias d='fasder -d'     # directories only
-alias f='fasder -f'     # files only
-```
-
-```bash
-# Immediately open best match for query in $EDITOR
-# Example: v {query}
-# Leave query empty to open top ranked file from fasd -f
-alias v='f -e $EDITOR'  # open best file match in $EDITOR
-```
-
-```bash
-# Immediately cd to best match for query
-# Example: j {query}
-# Leave query empty to cd previous directory (cd -)
-j() {
-  if [ "$#" -gt 0 ]; then
-    cd "$(fasder -e 'printf %s' "$1")" || return 1
-  else
-    cd -
-  fi
-}
-```
-
-### Interactive Aliases - requires [fzf](https://github.com/junegunn/fzf)
-
-These aliases are installed with `auto` initializer or individually with
-`--init fzf-aliases`.
-
-#### vv - quick edit from list
-
-```bash
-vv foo  # Interactive select from ranked files with fzf, then open in $EDITOR
-vv      # Leave query empty to select from full file list
-```
-
-<details>
-  <summary>Source</summary>
-
-> ```bash
-> # Interactive edit from list
-> vv() {
->   local selection
->   # Get the selection from fasder and fzf
->   selection=$(fasder -r -f -l "$1" | fzf -1 -0 --no-sort +m --height=10)
->
->   # Check if a selection was made
->   if [[ -n "$selection" ]]; then
->       # Ensure the editor is set and handle potential issues
->       if [[ -z "$EDITOR" ]]; then
->           echo "EDITOR environment variable is not set."
->           return 1
->       fi
->
->       # Use xargs with -r to prevent running the editor if no selection
->       echo "Selection: $selection"
->       echo "$selection" | xargs -r "$EDITOR"
->   else
->       echo "No selection made."
->       return 1
->   fi
-> }
-> ```
-
-</details>
-
-#### jj - quick jump from list
-
-```bash
-jj foo  # Interactive select from ranked files with fzf, then cd
-jj      # Leave query empty to select from full directory list
-```
-
-<details>
-  <summary>Source</summary>
-
-> ```bash
-> # Interactive cd from list
-> jj () {
->   local selection
->   selection=$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m --height=10)
->   if [[ -n "$selection" ]]; then
->     echo "Selection: $selection"
->     cd "$selection" || return 1
->   else
->     echo "No selection made"
->     return 1
->   fi
-> }
-> ```
-
-</details>
 
 ## Compared to `zoxide`
 
