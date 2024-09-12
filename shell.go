@@ -20,14 +20,14 @@ func aliases() {
     alias a='fasder'
     alias d='fasder -d'
     alias f='fasder -f'
-    alias v='f -e $EDITOR'
+    alias v='fasder -f -e $EDITOR'
   `)
 
 	// j - Jump to best match. If no arguments, jump to previous directory
 	fmt.Println(`
     j() {
       if [ "$#" -gt 0 ]; then
-        cd "$(fasder -e 'printf %s' "$1")" || return 1
+        cd "$(fasder -d -e 'printf %s' "$1")" || return 1
       else
         cd -
       fi
