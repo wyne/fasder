@@ -41,12 +41,18 @@ cp ~/.fasd ~/.fasder
 ## Getting started
 
 ```bash
-v zsh             # vim /commonly/used/file/.zshrc
-vv foo            # interactively select from files matching 'foo'
+v def conf      # =>    vim /some/awkward/path/to/type/default.conf
+j abc           # =>    cd /hell/of/a/awkward/path/to/get/to/abcdef
+m movie         # =>    mplayer /whatever/whatever/whatever/awesome_movie.mp4
+o eng paper     # =>    xdg-open /you/dont/remember/where/english_paper.pdf
+vim `f rc lo`   # =>    vim /etc/rc.local
+vim `f rc conf` # =>    vim /etc/rc.conf
 
-j foo             # cd /commonly/used/path/foo
-jj foo            # interactively select from dirs matching 'foo'
-j                 # cd - (back to previous directory)
+v zsh           # =>    vim /commonly/used/file/.zshrc
+vv foo          # =>    (interactive)
+j foo           # =>    cd /commonly/used/path/foo
+jj foo          # =>    (interactive)
+j               # =>    cd - (back to previous directory)
 ```
 
 The default `v` and `vv` commands use the `$EDITOR` var instead of vim. Ex: `export EDITOR=nvim`.
