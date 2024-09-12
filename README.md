@@ -59,23 +59,6 @@ The default `v` and `vv` commands use the `$EDITOR` var instead of vim. Ex: `exp
 
 ## Usage
 
-### Base commands
-
-These commands will query the database or show the full database when no
-query is provided. Results are ranked by usage.
-
-```bash
-fasder        # both files and directories
-fasder -d     # directories only
-fasder -f     # files only
-```
-
-Flags
-
-- `-l` omit scores and only print paths. Useful for piping into other tools
-- `-r` reverse the list
-- `-e {cmd}` execute {cmd} on the best match
-
 ### Aliases
 
 These aliases are installed by passing `aliases` as an init parameter.
@@ -145,6 +128,23 @@ jj () {
   fi
 }
 ```
+
+## Base commands
+
+These commands will query the database or show the full database when no
+query is provided. Results are ranked by usage.
+
+```bash
+fasder        # both files and directories
+fasder -d     # directories only
+fasder -f     # files only
+```
+
+Flags
+
+- `-l` omit scores and only print paths. Useful for piping into other tools
+- `-r` reverse the list
+- `-e {cmd}` execute {cmd} on the best match
 
 ## Compared to `zoxide`
 
