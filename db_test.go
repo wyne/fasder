@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -15,16 +16,27 @@ func TestFuzzyFind(t *testing.T) {
 		expected   []PathEntry
 	}{
 		{
-			name:       "Match only last path segment",
-			searchTerm: "score",
+			name:       "Gracefully handle empty paths",
+			searchTerm: "one",
 			entries: []PathEntry{
-				{Path: "/Users/justin/workspace/scorepad-react-native/android"},
-				{Path: "/Users/justin/workspace/scorepad-react-native"},
+				{Path: "/one/two"},
+				{Path: ""},
+			},
+			filesOnly: false,
+			dirsOnly:  false,
+			expected:  []PathEntry{},
+		},
+		{
+			name:       "Match only last path segment",
+			searchTerm: "one",
+			entries: []PathEntry{
+				{Path: "/one/two"},
+				{Path: "/one"},
 			},
 			filesOnly: false,
 			dirsOnly:  false,
 			expected: []PathEntry{
-				{Path: "/Users/justin/workspace/scorepad-react-native"},
+				{Path: "/one"},
 			},
 		},
 		{
@@ -72,7 +84,22 @@ func TestFuzzyFind(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := fuzzyFind(tt.entries, tt.searchTerm)
 			if !equalPathEntries(got, tt.expected) {
-				t.Errorf("%s\n, fuzzyFind() = %v, want %v", tt.name, got, tt.expected)
+
+				found := make([]string, len(got))
+				for i, p := range got {
+					found[i] = "    " + p.Path
+				}
+
+				want := make([]string, len(tt.expected))
+				for i, p := range tt.expected {
+					want[i] = "    " + p.Path
+				}
+
+				t.Errorf("%s\n\nSearch: %s\nFound:\n%v\nWant:\n%v",
+					tt.name,
+					tt.searchTerm,
+					strings.Join(found, "\n"),
+					strings.Join(want, "\n"))
 			}
 		})
 	}

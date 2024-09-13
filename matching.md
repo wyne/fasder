@@ -21,6 +21,11 @@ Algorithm
 - Run search twice. Once with last segment split by file extension and once without.
 - (?) What if there's multiple file extensions?
 
+Rules
+The last search term must match the last segment of the path (this applies to both methods: splitting by / and splitting by / and .).
+Search terms must match in the order they appear. For example, if the search is "tm con", "tm" must appear before "con" in the path segments.
+The path segments do not have to be adjacent, meaning the search terms can match across non-consecutive segments, but they must follow the order of appearance.
+
 ## One word search
 
 Match only against the last path segment.
