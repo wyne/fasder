@@ -28,6 +28,19 @@ func TestFuzzyFind(t *testing.T) {
 			},
 		},
 		{
+			name:       "Match partial file name and extension",
+			searchTerm: "tm con",
+			entries: []PathEntry{
+				{Path: "/Users/justin/.config/tmux/tmux.conf"},
+				{Path: "/Users/justin/another/path.conf"},
+			},
+			filesOnly: false,
+			dirsOnly:  false,
+			expected: []PathEntry{
+				{Path: "/Users/justin/.config/tmux/tmux.conf"},
+			},
+		},
+		{
 			name:       "Match partial term in path",
 			searchTerm: ".conf tmu",
 			entries: []PathEntry{
