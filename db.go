@@ -51,56 +51,85 @@ func sortEntries(entries []PathEntry, reverse bool) []PathEntry {
 	return entries
 }
 
-// Fuzzy search function
-func fuzzyFind(entries []PathEntry, searchTerm string, filesOnly bool, dirsOnly bool) []PathEntry {
+// Fuzzy find function that matches the search terms to the paths
+func fuzzyFind(entries []PathEntry, searchTerm string) []PathEntry {
 	// Collect matching entries
 	var results []PathEntry
 
 	if searchTerm == "" {
-		results = entries
-	} else {
-		var pathEndSegments []string
-		var pathFirstSegments []string
+		return entries
+	}
 
-		// Split search term by spaces
-		searchTerms := strings.Split(searchTerm, " ")
+	// Split the search term into segments based on spaces
+	searchTerms := strings.Split(searchTerm, " ")
 
-		// Prepare paths and segments
-		for _, entry := range entries {
-			parts := strings.Split(entry.Path, "/")
-			pathEndSegments = append(pathEndSegments, parts[len(parts)-1])                         // Last segment
-			pathFirstSegments = append(pathFirstSegments, strings.Join(parts[:len(parts)-1], "/")) // First part of path
-		}
+	// Loop through each entry and check for a match
+	for _, entry := range entries {
+		// Split the path into segments using `/` for directories but treat the last segment (file) as a whole
+		pathSegments := splitByPath(entry.Path)
+		pathAndFileSegments := splitByPathAndFile(entry.Path)
 
-		var matches fuzzy.Matches
-		if len(searchTerms) > 1 {
-			searchTermStart := strings.Join(searchTerms[:len(searchTerms)-1], "")
-			searchTermEnd := searchTerms[len(searchTerms)-1]
+		methodA := matchInOrder(searchTerms, pathSegments)
+		methodB := matchInOrder(searchTerms, pathAndFileSegments)
 
-			// Fuzzy match first term in first part of path and second term in last segment
-			leadingTermMatches := fuzzy.Find(searchTermStart, pathFirstSegments) // First part matching
-			endTermMatches := fuzzy.Find(searchTermEnd, pathEndSegments)         // Last segment matching
-
-			// Set results to paths that match both leadingTermMatches and endTermMatches
-			for _, leadingMatch := range leadingTermMatches {
-				for _, endMatch := range endTermMatches {
-					if leadingMatch.Index == endMatch.Index { // Both match the same path
-						results = append(results, entries[leadingMatch.Index])
-					}
-				}
-			}
-
-		} else {
-			// Perform fuzzy search on the last segment only (default behavior)
-			matches = fuzzy.Find(searchTerms[0], pathEndSegments)
-			for _, match := range matches {
-				results = append(results, entries[match.Index])
-			}
+		// Check if search terms match the path segments in order
+		if methodA || methodB {
+			results = append(results, entry)
 		}
 	}
 
-	// Filter results based on file/dir-only flags
-	return filterEntries(results, filesOnly, dirsOnly)
+	return results
+}
+
+// Split the path into segments using '/'
+func splitByPath(path string) []string {
+	return strings.Split(path, "/")
+}
+
+// Split the path into segments using both `/` and `.` as delimiters
+// Split by both '/' and '.'
+func splitByPathAndFile(path string) []string {
+	return strings.FieldsFunc(path, func(r rune) bool {
+		return r == '/' || r == '.'
+	})
+}
+
+// Check if the search terms match the path segments in order,
+// with the last search term matching the last path segment.
+func matchInOrder(searchTerms []string, pathSegments []string) bool {
+	// Ensure both searchTerms and pathSegments are not empty
+	if len(searchTerms) == 0 || len(pathSegments) == 0 {
+		return false
+	}
+
+	// Ensure the last search term matches the last path segment
+	if !match(searchTerms[len(searchTerms)-1], pathSegments[len(pathSegments)-1]) {
+		return false
+	}
+
+	// Initialize index pointers for search terms and path segments
+	searchIndex := 0
+	segmentIndex := 0
+
+	// Match the search terms to path segments in order (ignoring adjacency but maintaining sequence)
+	for searchIndex < len(searchTerms)-1 && segmentIndex < len(pathSegments)-1 {
+		if match(searchTerms[searchIndex], pathSegments[segmentIndex]) {
+			// Move to the next search term if a match is found
+			searchIndex++
+		}
+		// Always move to the next path segment
+		segmentIndex++
+	}
+
+	// If all search terms were matched, return true
+	return searchIndex == len(searchTerms)-1
+}
+
+// Fuzzy match function using fuzzy.Find
+func match(searchTerm string, pathSegment string) bool {
+	// Perform fuzzy finding on the path segment using the search term
+	matches := fuzzy.Find(searchTerm, []string{pathSegment})
+	return len(matches) > 0 // Return true if there's a match, otherwise false
 }
 
 // Helper function to filter files or directories
