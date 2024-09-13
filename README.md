@@ -270,6 +270,10 @@ one large shell script which is difficult to read and maintain and contains no t
 `fasder` is written in a modern language that is easy to adapt and expand to meet
 more use cases.
 
+# To do
+
+- [ ] Bug: Null characters written to some lines (concurrency issue?)
+
 # Features
 
 - [x] Brew Formulae (`brew install wyne/tap/fasder`)
