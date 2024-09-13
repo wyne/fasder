@@ -56,15 +56,6 @@ jj foo          # =>    (interactive)
 j               # =>    cd - (back to previous directory)
 ```
 
-```bash
-v def conf       # =>     vim /some/awkward/path/to/type/default.conf
-j abc            # =>     cd /an/awkward/path/to/get/to/abcdef
-m movie          # =>     mplayer /whatever/whatever/whatever/awesome_movie.mp4
-o eng paper      # =>     xdg-open /you/dont/remember/where/english_paper.pdf
-vim `f rc lo`    # =>     vim /etc/rc.local
-vim `f rc conf`  # =>     vim /etc/rc.conf
-```
-
 The default `v` and `vv` commands use the `$EDITOR` var instead of vim. Ex: `export EDITOR=nvim`.
 
 ## Usage
@@ -152,7 +143,7 @@ fasder -f     # files only
 
 Flags
 
-- `-s` show rank scores
+- `-l` list paths without ranks
 - `-r` reverse the list
 - `-e {cmd}` execute {cmd} on the best match
 
@@ -198,7 +189,7 @@ more use cases.
   - [ ] recently used
 - [ ] Flags
   - [x] `-r` reverse
-  - [x] `-s` show rank scores
+  - [x] `-l` list paths without ranks
   - [x] `-f` files
   - [x] `-e` execute
   - [ ] `-t` recent access only

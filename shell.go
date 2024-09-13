@@ -25,13 +25,13 @@ func aliases() {
 
 	// j - Jump to best match. If no arguments, jump to previous directory
 	j := `
-        j() {
+      j() {
         if [ "$#" -gt 0 ]; then
-            cd "$(fasder -d -e 'printf %s' "$1")" || return 1
+          cd "$(fasder -d -e 'printf %s' "$1")" || return 1
         else
-            cd -
+          cd -
         fi
-        }
+      }
     `
 	fmt.Println(j)
 }
