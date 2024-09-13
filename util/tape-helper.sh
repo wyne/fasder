@@ -12,6 +12,7 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
+## TODO: init fasder with an alternate db file
 alias fasder=~/workspace/fasder/fasder
 
 j() {
@@ -35,5 +36,12 @@ alias z='fasder_cd -d'
 alias a='fasder'
 alias d='fasder -d'
 alias f='fasder -f'
+alias v='fasder -f -e vim'
 
 echo -e "\033[35mThis is purple text\033[0m"
+
+_fasder_preexec() {
+  { eval "fasder --proc $(fasder --sanitize $2)"; } >> /dev/null 2>&1
+}
+autoload -Uz add-zsh-hook
+add-zsh-hook preexec _fasder_preexec

@@ -2,9 +2,9 @@
 # Run with:
 # vhs util/demo.tape
 
-Output overview.gif
+Output setup.gif
 
-Set Shell "zsh --no-rcs"
+Set Shell "zsh"
 
 Set FontSize 16
 Set Width 900
@@ -29,28 +29,18 @@ Show
 
 Sleep 1s
 
-# Open ZSHRC
-Type "v zsh # vi ~/.zshrc"
+# Populate db
+Type "echo 'Hello' > hello-file.txt"
 Sleep 1s
 Enter
 Sleep 2s
 
-# Quit vim
-Type ":q"
-Enter
-Sleep 1s
-
-Type "ls file1"
+Type "f hello # search recent files for hello"
 Sleep 1s
 Enter
 Sleep 2s
 
-Type "fasder -f fil # Search files added to the database with a substring"
-Sleep 1s
-Enter
-Sleep 2s
-
-Type "fasder -f -e vim fil # Open the best match with vim"
+Type "f -e vim hello # open the file in vim"
 Sleep 1s
 Enter
 Sleep 2s
@@ -59,12 +49,12 @@ Type ":q"
 Enter
 Sleep 1s
 
-Type "alias v='fasder -f -e vim' # Make an alias for faster use"
+Type "which v"
 Sleep 1s
 Enter
 Sleep 2s
 
-Type "v fil # Productivity boost"
+Type "v hello # Productivity boost"
 Sleep 1s
 Enter
 Sleep 2s
