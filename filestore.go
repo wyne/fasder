@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/wyne/fasder/logger"
@@ -61,7 +62,14 @@ func readFileStore() ([]PathEntry, error) {
 	return entries, scanner.Err()
 }
 
+var mu sync.Mutex
+
 func writeFileStore(entries []PathEntry) {
+	mu.Lock() // Lock to prevent concurrent access
+	defer mu.Unlock()
+
+	tempPrefix := "fasder-"
+
 	var cumulativeRank float64
 	for _, entry := range entries {
 		cumulativeRank += entry.Rank
@@ -78,17 +86,33 @@ func writeFileStore(entries []PathEntry) {
 		}
 	}
 
-	f, err := os.Create(dataFile) // Truncate and rewrite the file
+	// Create a temporary file
+	tempFile, err := os.CreateTemp(filepath.Dir(dataFile), tempPrefix)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer f.Close()
+	defer tempFile.Close()
 
 	for _, entry := range entries {
 		line := fmt.Sprintf("%s|%.5f|%d\n", entry.Path, entry.Rank, entry.LastAccessed)
-		if _, err := f.WriteString(line); err != nil {
+		if _, err := tempFile.WriteString(line); err != nil {
 			log.Fatal(err)
 		}
+	}
+
+	// Sync to make sure all data is written
+	if err := tempFile.Sync(); err != nil {
+		log.Fatal(err)
+	}
+
+	// Close the temporary file before renaming
+	if err := tempFile.Close(); err != nil {
+		log.Fatal(err)
+	}
+
+	// Rename the temporary file to replace the original file atomically
+	if err := os.Rename(tempFile.Name(), dataFile); err != nil {
+		log.Fatal(err)
 	}
 }
 
