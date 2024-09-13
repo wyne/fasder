@@ -178,7 +178,8 @@ more use cases.
   - [ ] Remove entries from file store on filtering
 - [ ] Matching
   - [x] Last segment matching
-  - [x] Full path matching. Ex: {dir substr} {file substr} ([ref](https://github.com/clvv/fasd?tab=readme-ov-file#matching))
+  - [x] Multiple path segment matching. Ex: {dir substr} {file substr} ([ref](https://github.com/clvv/fasd?tab=readme-ov-file#matching))
+  - [ ] Full path matching. Ex: /some/dir/file
 - [ ] Backends
   - [x] `fasd` format in `~/.fasder`
   - [x] neovim
