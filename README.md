@@ -3,7 +3,8 @@
 
 # fasder
 
-This is a rewrite of [clvv/fasd](http://github.com/clvv/fasd) in go.
+This is a rewrite of [clvv/fasd](http://github.com/clvv/fasd) in go. This is primarily
+a learning project for myself, but may be useful to others one day.
 
 Fasder, pronounced like "faster" but with a d, offers quick access to commonly
 used files and directories. Fasder tracks the files and directories you access
@@ -63,6 +64,7 @@ o eng paper      # =>     xdg-open /you/dont/remember/where/english_paper.pdf
 vim `f rc lo`    # =>     vim /etc/rc.local
 vim `f rc conf`  # =>     vim /etc/rc.conf
 ```
+
 The default `v` and `vv` commands use the `$EDITOR` var instead of vim. Ex: `export EDITOR=nvim`.
 
 ## Usage
@@ -262,10 +264,11 @@ jj      # Leave query empty to select from full directory list
 ## Compared to `fasd`
 
 [clvv/fasd](http://github.com/clvv/fasd), the inspiration for `fasder`, has been
-archived and no longer has a Brew formulae. Additionally, it was written as
-one large shell script which is difficult to read and maintain.
+archived and will no longer be expanded. Additionally, it was written as
+one large shell script which is difficult to read and maintain and contains no tests.
 
-`fasder` is written in a modern language that is easy to adapt.
+`fasder` is written in a modern language that is easy to adapt and expand to meet
+more use cases.
 
 # Features
 

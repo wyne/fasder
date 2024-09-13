@@ -16,43 +16,94 @@ Search: username project file.ext
 [2]  Users username .config project file ext ext2
 ```
 
-========== Scenario 1 ==========
-One search term
+Algorithm
 
-Example Search:
+- Run search twice. Once with last segment split by file extension and once without.
+- (?) What if there's multiple file extensions?
 
-- score
+## One word search
 
-Positive matches
+Match only against the last path segment.
 
+### Example: `fasder score`
+
+**Positive matches**
+
+```
+                         |---search-window-----|
 - /Users/justin/workspace/scorepad-react-native
+                          ^^^^^
+
+                                              |-srch-win-|
 - /Users/justin/workspace/scorepad-react-native/score.tsx
+                                                ^^^^^
+```
 
 Negative matches:
 
+```
+                                               |-srch-w|
 - /Users/justin/workspace/scorepad-react-native/android
+                          XXXXX not in last segment
+
+                                               |-srch-w|
 - /Users/justin/workspace/scorepad-react-native/App.tsx
+                          XXXXX not in last segment
+```
 
-Approach
+## Two word search
 
-- Match only last path segment
+Match against either:
 
-========== Scenario 2 ==========
-Two search terms
+- Last path segment: filename plus extension
+- One path segment + last path segment
 
-Example Search:
+Path
 
-- score
+```
+      |--1--|--1---|----1----|--1---|-----1-----|2-|
+A     /Users/justin/workspace/fasder/commandfile.go
 
-Positive matches
+      |--1--|--1---|----1----|--1---|------2-------|
+B     /Users/justin/workspace/fasder/commandfile.go
 
-- /Users/justin/workspace/scorepad-react-native
+```
 
-Negative matches:
+Searches
 
-- /Users/justin/workspace/scorepad-react-native/android
+- `fasder com go` A
+- `fasder com g` A
+- `fasder fa com` B
+- `fasder work .go` B
+- `fasder fa com` B
+- `fasder command file go` X - the three terms force 'command' and 'file' to be in different segments
 
-========== Scenario 3 ==========
+## Three word search
+
+Match against either:
+
+- Last path segment: filename plus extension
+- One path segment + last path segment
+
+Path
+
+```
+      |--1--|--12--|----12---|--12--|----23-----|3-|
+A     /Users/justin/workspace/fasder/commandfile.go
+
+      |--1--|--12--|----12---|---2--|------3-------|
+B     /Users/justin/workspace/fasder/commandfile.go
+
+```
+
+Searches
+
+- `fasder fa com go` A
+- `fasder fasder commandfile go` A
+- `fasder ju fa commandfile.go` B
+- `fasder work .go` B
+- `fasder fa com` B
+- `fasder command file go` X - the three terms force 'command' and 'file' to be in different segments
 
 # Future considerations
 
