@@ -70,11 +70,11 @@ func TestSubshellDetection(t *testing.T) {
 	// Restore original stdout
 	os.Stdout = oldStdout
 
-	fmt.Printf("output %s", output)
-
 	// Check if only one line is printed
 	lines := strings.Split(strings.TrimSpace(output), "\n")
-	if len(lines) != 1 {
+	if len(lines) == 1 && lines[0] == tempFile2.Name() {
+		// pass
+	} else {
 		t.Errorf("Expected one line of output, but got %d lines", len(lines))
 	}
 }
