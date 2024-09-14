@@ -78,6 +78,9 @@ func main() {
 	filteredEntries := filterEntries(matchingEntries, files, dirs)
 	sortedEntries := sortEntries(filteredEntries, *reverse)
 
+	// If running in a subshell (ex: vim `f zsh`), only
+	// return one result, and auto apply -l list mode
+	// to omit score ranks in output
 	if !terminal.IsTerminal(int(os.Stdout.Fd())) {
 		*list = true
 		bestMatch := []PathEntry{sortedEntries[len(sortedEntries)-1]}
