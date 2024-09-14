@@ -12,7 +12,7 @@ func zshHook() {
     }
     autoload -Uz add-zsh-hook
     add-zsh-hook preexec _fasder_preexec
-  `)
+    `)
 }
 
 func aliases() {
@@ -20,35 +20,37 @@ func aliases() {
     alias a='fasder'
     alias d='fasder -d'
     alias f='fasder -f'
-    alias v='f -e $EDITOR'
-  `)
+    alias v='fasder -f -e $EDITOR'
+    `)
 
 	// j - Jump to best match. If no arguments, jump to previous directory
-	fmt.Println(`
-    j() {
-      if [ "$#" -gt 0 ]; then
-        cd "$(fasder -e 'printf %s' "$1")" || return 1
-      else
-        cd -
-      fi
-    }
-  `)
+	j := `
+	j() {
+	    if [ "$#" -gt 0 ]; then
+	        cd "$(fasder -d -e 'printf %s' "$1")" || return 1
+	    else
+	        cd -
+	    fi
+	}
+	`
+	fmt.Println(j)
 }
 
 func fzfAliases() {
 	fmt.Println(`
     jj () {
-      local selection
-      selection=$(fasder -r -d "$1" | fzf -1 -0 --no-sort +m --height=10)
-      if [[ -n "$selection" ]]; then
-        echo "Selection: $selection"
-        cd "$selection" || return 1
-      else
-        echo "No selection made"
-        return 1
-      fi
+        local selection
+        selection=$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m --height=10)
+        if [[ -n "$selection" ]]; then
+            echo "Selection: $selection"
+            cd "$selection" || return 1
+        else
+            echo "No selection made"
+            return 1
+        fi
     }
-  `)
+    `)
+
 	fmt.Println(`
     vv () {
       local selection

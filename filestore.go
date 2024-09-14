@@ -3,11 +3,15 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"os"
+	"os/user"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
+	"syscall"
 	"time"
 
 	"github.com/wyne/fasder/logger"
@@ -16,14 +20,34 @@ import (
 var dataFile string
 
 func LoadFileStore() {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		// Silently return
-		return
+	dataFile = os.Getenv("_FASDER_DATA")
+	if dataFile == "" {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			// Silently return
+			return
+		}
+		// Expand the ~ to the home directory
+		dataFile = filepath.Join(homeDir, ".fasder")
 	}
 
-	// Expand the ~ to the home directory
-	dataFile = filepath.Join(homeDir, ".fasder")
+	// Check if the file exists and is owned by the current user
+	if fileInfo, err := os.Stat(dataFile); err == nil {
+		if !fileInfo.Mode().IsRegular() {
+			log.Fatalf("%s is not a regular file", dataFile)
+		}
+		currentUser, err := user.Current()
+		if err != nil {
+			log.Fatal(err)
+		}
+		fileOwner, err := user.LookupId(fmt.Sprint(fileInfo.Sys().(*syscall.Stat_t).Uid))
+		if err != nil {
+			log.Fatal(err)
+		}
+		if currentUser.Uid != fileOwner.Uid {
+			log.Fatalf("You do not own the file %s", dataFile)
+		}
+	}
 }
 
 // Reads the `.fasder` file and loads file entries into a slice
@@ -39,7 +63,12 @@ func readFileStore() ([]PathEntry, error) {
 	}
 	defer f.Close()
 
-	scanner := bufio.NewScanner(f)
+	return readEntriesFromReader(f)
+}
+
+func readEntriesFromReader(r io.Reader) ([]PathEntry, error) {
+	var entries []PathEntry
+	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		line := scanner.Text()
 		parts := strings.Split(line, "|")
@@ -61,7 +90,14 @@ func readFileStore() ([]PathEntry, error) {
 	return entries, scanner.Err()
 }
 
+var mu sync.Mutex
+
 func writeFileStore(entries []PathEntry) {
+	mu.Lock() // Lock to prevent concurrent access
+	defer mu.Unlock()
+
+	tempPrefix := "fasder-"
+
 	var cumulativeRank float64
 	for _, entry := range entries {
 		cumulativeRank += entry.Rank
@@ -78,17 +114,33 @@ func writeFileStore(entries []PathEntry) {
 		}
 	}
 
-	f, err := os.Create(dataFile) // Truncate and rewrite the file
+	// Create a temporary file
+	tempFile, err := os.CreateTemp(filepath.Dir(dataFile), tempPrefix)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer f.Close()
+	defer tempFile.Close()
 
 	for _, entry := range entries {
 		line := fmt.Sprintf("%s|%.5f|%d\n", entry.Path, entry.Rank, entry.LastAccessed)
-		if _, err := f.WriteString(line); err != nil {
+		if _, err := tempFile.WriteString(line); err != nil {
 			log.Fatal(err)
 		}
+	}
+
+	// Sync to make sure all data is written
+	if err := tempFile.Sync(); err != nil {
+		log.Fatal(err)
+	}
+
+	// Close the temporary file before renaming
+	if err := tempFile.Close(); err != nil {
+		log.Fatal(err)
+	}
+
+	// Rename the temporary file to replace the original file atomically
+	if err := os.Rename(tempFile.Name(), dataFile); err != nil {
+		log.Fatal(err)
 	}
 }
 

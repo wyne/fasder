@@ -15,14 +15,12 @@ func Init(args []string) {
 	for _, initializer := range args {
 		switch initializer {
 		case "auto":
+			// TODO: Support other shells
 			zshHook()
-			aliases()
-			fzfAliases()
 		case "zsh-hook":
 			zshHook()
 		case "aliases":
 			aliases()
-		case "fzf-aliases":
 			fzfAliases()
 		}
 	}

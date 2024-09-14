@@ -3,9 +3,11 @@ package main
 import (
 	"flag"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/wyne/fasder/logger"
+	"golang.org/x/term"
 )
 
 // Global variable to hold the logger
@@ -40,7 +42,7 @@ func main() {
 	// Commands
 
 	if *version {
-		println("0.1.3")
+		println("0.1.4")
 		return
 	}
 
@@ -73,8 +75,21 @@ func main() {
 	// Search
 	searchTerm := strings.Join(flag.Args(), " ")
 	logger.Log.Printf("Search term: %s", searchTerm)
-	matchingEntries := fuzzyFind(entries, searchTerm, files, dirs)
-	sortedEntries := sortEntries(matchingEntries, *reverse)
+	matchingEntries := fuzzyFind(entries, searchTerm)
+	filteredEntries := filterEntries(matchingEntries, files, dirs)
+	sortedEntries := sortEntries(filteredEntries, *reverse)
+
+	// If running in a subshell (ex: vim `f zsh`), only
+	// return one result, and auto apply -l list mode
+	// to omit score ranks in output
+	if !term.IsTerminal(int(os.Stdout.Fd())) {
+		*list = true
+		if len(sortedEntries) > 0 {
+			bestMatch := []PathEntry{sortedEntries[len(sortedEntries)-1]}
+			displaySortedEntries(bestMatch, *list)
+		}
+		return
+	}
 
 	// Execute if necessary
 	if *execCmd != "" {
