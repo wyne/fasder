@@ -1,19 +1,18 @@
 > [!WARNING]
 > This project is under active development and may have breaking changes without warning.
 
-# fasder
+# fasder - zoxide for files
 
-This is a rewrite of [clvv/fasd](http://github.com/clvv/fasd) in go. This is primarily
-a learning project for myself, but may be useful to others one day.
+This is a modern rewrite of [clvv/fasd](http://github.com/clvv/fasd) that provides
+[zoxide](https://github.com/ajeetdsouza/zoxide)-style "frecently" used access to files and directories.
 
 Fasder, pronounced like "faster" but with a d, offers quick access to commonly
-used files and directories. Fasder tracks the files and directories you access
+used files and directories. Fasder tracks the files and directories that you access
 and ranks them based on usage. You can then use the built in commands or
 construct your own to reference them with minimal keystrokes.
 
 For example, once you've opened your zsh config once, you can then use something
-like `v zsh` or `v .z` to immediately run `nvim ~/.zshrc`. See the aliases section
-below to see how this works.
+like `v zsh` or `v z` to immediately run `nvim ~/.zshrc`.
 
 ![Demo](./demo.gif)
 
@@ -26,10 +25,10 @@ brew install wyne/tap/fasder
 echo 'eval "$(fasder --init auto)"' >> ~/.zshrc
 ```
 
-With default aliases `f`, `a`, `d`, `v`, `vv`, `j`, `jj` (see [aliases](#aliases)):
+With dependencies and default aliases `f`, `a`, `d`, `v`, `vv`, `j`, `jj` (see [aliases](#aliases)):
 
 ```bash
-brew install wyne/tap/fasder
+brew install wyne/tap/fasder fzf
 echo 'eval "$(fasder --init auto aliases)"' >> ~/.zshrc
 ```
 
@@ -79,7 +78,7 @@ alias v='f -e $EDITOR'
 # Leave query empty to cd previous directory (cd -)
 j() {
   if [ "$#" -gt 0 ]; then
-    cd "$(fasder -e 'printf %s' "$1")" || return 1
+    cd "$(fasder -d -e 'printf %s' "$1")" || return 1
   else
     cd -
   fi
