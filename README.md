@@ -70,64 +70,11 @@ alias a='fasder'        # both files and directories
 alias d='fasder -d'     # directories only
 alias f='fasder -f'     # files only
 
-# Open best file match in $EDITOR
-# Example: v {query}
-alias v='f -e $EDITOR'
-
-# Immediately cd to best match for query
-# Example: j {query}
-# Leave query empty to cd previous directory (cd -)
-j() {
-  if [ "$#" -gt 0 ]; then
-    cd "$(fasder -d -e 'printf %s' "$1")" || return 1
-  else
-    cd -
-  fi
-}
-```
-
-These interactive aliases require [fzf](https://github.com/junegunn/fzf).
-
-```bash
-# Interactive edit from list. Requires fzf
-# Example: vv zsh     # Interactive select from ranked files with fzf, then open in $EDITOR
-# Example: vv         # Leave query empty to select from full file list                     #
-vv() {
-  local selection
-  # Get the selection from fasder and fzf
-  selection=$(fasder -r -f -l "$1" | fzf -1 -0 --no-sort +m --height=10)
-
-  # Check if a selection was made
-  if [[ -n "$selection" ]]; then
-      # Ensure the editor is set and handle potential issues
-      if [[ -z "$EDITOR" ]]; then
-          echo "EDITOR environment variable is not set."
-          return 1
-      fi
-
-      # Use xargs with -r to prevent running the editor if no selection
-      echo "Selection: $selection"
-      echo "$selection" | xargs -r "$EDITOR"
-  else
-      echo "No selection made."
-      return 1
-  fi
-}
-
-# Interactive cd from list
-# Example: jj foo     # Interactive select from ranked files with fzf, then cd
-# Example: jj         # Leave query empty to select from full directory list
-jj () {
-  local selection
-  selection=$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m --height=10)
-  if [[ -n "$selection" ]]; then
-    echo "Selection: $selection"
-    cd "$selection" || return 1
-  else
-    echo "No selection made"
-    return 1
-  fi
-}
+v zsh                   # =>    vim /commonly/used/file/.zshrc
+vv zsh                  # =>    (interactive)
+j foo                   # =>    cd /commonly/used/path/foo
+jj foo                  # =>    (interactive)
+j                       # =>    cd - (back to previous directory)
 ```
 
 ## Base commands
@@ -142,6 +89,21 @@ fasder -f     # files only
 ```
 
 Flags
+
+```bash
+fasder [options] [query ...]
+  options:
+    -l         list paths without scores
+    -e <cmd>   set command to execute on the result file
+    -d         match directories only
+    -f         match files only
+    -r         reverse listing order
+    -h         show a brief help message
+
+fasder [-A|-D] [paths ...]
+    -A    add paths
+    -D    delete paths
+```
 
 - `-l` list paths without ranks
 - `-r` reverse the list
