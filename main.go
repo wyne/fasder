@@ -3,9 +3,11 @@ package main
 import (
 	"flag"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/wyne/fasder/logger"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // Global variable to hold the logger
@@ -75,6 +77,16 @@ func main() {
 	matchingEntries := fuzzyFind(entries, searchTerm)
 	filteredEntries := filterEntries(matchingEntries, files, dirs)
 	sortedEntries := sortEntries(filteredEntries, *reverse)
+
+	// If running in a subshell (ex: vim `f zsh`), only
+	// return one result, and auto apply -l list mode
+	// to omit score ranks in output
+	if !terminal.IsTerminal(int(os.Stdout.Fd())) {
+		*list = true
+		bestMatch := []PathEntry{sortedEntries[len(sortedEntries)-1]}
+		displaySortedEntries(bestMatch, *list)
+		return
+	}
 
 	// Execute if necessary
 	if *execCmd != "" {
