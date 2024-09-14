@@ -3,9 +3,11 @@ package main
 import (
 	"flag"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/wyne/fasder/logger"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // Global variable to hold the logger
@@ -33,6 +35,10 @@ func main() {
 
 	files := *filesOnly || (!*filesOnly && !*dirsOnly)
 	dirs := *dirsOnly || (!*filesOnly && !*dirsOnly)
+
+	if !terminal.IsTerminal(int(os.Stdout.Fd())) {
+		*list = true
+	}
 
 	LoadFileStore()
 
