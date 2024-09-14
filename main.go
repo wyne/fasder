@@ -26,7 +26,6 @@ func main() {
 	init := flag.Bool("init", false, "Initialize fasder. Flags: zsh-hook aliases zsh-aliases, or auto for all  ")
 	execCmd := flag.String("e", "", "Execute provided command against best match")
 	list := flag.Bool("l", false, "List only. Omit rankings")
-	many := flag.Bool("m", false, "Show all matches. Override subshell default of one match")
 	reverse := flag.Bool("r", false, "Reverse sort. Useful to pipe into fzf")
 	scores := flag.Bool("s", false, "Show rank scores")
 
@@ -80,24 +79,34 @@ func main() {
 	filteredEntries := filterEntries(matchingEntries, files, dirs)
 	sortedEntries := sortEntries(filteredEntries, *reverse)
 
+	var onlyOne bool
+	onlyOne = false
+
+	// to omit score ranks in output
+	if !term.IsTerminal(int(os.Stdout.Fd())) && !*list {
+		onlyOne = true
+	}
+
 	// If running in a subshell (ex: vim `f zsh`), only
 	// return one result, and auto apply -l list mode
 	// to omit score ranks in output
 	if !term.IsTerminal(int(os.Stdout.Fd())) {
 		*list = true
-		if len(sortedEntries) > 0 && !*many {
-			bestMatch := []PathEntry{sortedEntries[len(sortedEntries)-1]}
-			displaySortedEntries(bestMatch, *list)
-			return
-		} else if *many {
-		} else {
-			return
-		}
 	}
 
 	// Execute if necessary
 	if *execCmd != "" {
 		execute(sortedEntries, *execCmd)
+		return
+	}
+
+	if len(sortedEntries) == 0 {
+		return
+	}
+
+	if onlyOne {
+		bestMatch := []PathEntry{sortedEntries[len(sortedEntries)-1]}
+		displaySortedEntries(bestMatch, *list)
 	} else {
 		displaySortedEntries(sortedEntries, !*scores)
 	}

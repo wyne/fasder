@@ -88,7 +88,7 @@ func TestList(t *testing.T) {
 	defer teardown()
 
 	LoadFileStore()
-	os.Args = []string{"cmd", "-m"}
+	os.Args = []string{"cmd", "-l"}
 	main()
 
 	w.Close()
