@@ -2,12 +2,13 @@ package main
 
 import (
 	"bytes"
-	"flag"
 	"fmt"
 	"os"
 	"reflect"
 	"strings"
 	"testing"
+
+	flag "github.com/spf13/pflag"
 
 	"golang.org/x/term"
 )

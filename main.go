@@ -1,11 +1,11 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"os"
 	"strings"
 
+	flag "github.com/spf13/pflag"
 	"github.com/wyne/fasder/logger"
 	"golang.org/x/term"
 )
@@ -17,20 +17,20 @@ func main() {
 	logger.InitLog()
 
 	// Internal flags
-	add := flag.String("add", "", "Internal: Add path to the store")
-	sanitize := flag.Bool("sanitize", false, "Internal: Sanitize command before processing")
-	proc := flag.Bool("proc", false, "Internal: Process a zsh-hook command")
+	add := flag.StringP("add", "A", "", "Internal: Add path to the store")
+	sanitize := flag.BoolP("sanitize", "", false, "Internal: Sanitize command before processing")
+	proc := flag.BoolP("proc", "", false, "Internal: Process a zsh-hook command")
 
 	// User flags
-	version := flag.Bool("v", false, "View version")
-	init := flag.Bool("init", false, "Initialize fasder. Flags: zsh-hook aliases zsh-aliases, or auto for all  ")
-	execCmd := flag.String("e", "", "Execute provided command against best match")
-	list := flag.Bool("l", false, "List only. Omit rankings")
-	reverse := flag.Bool("r", false, "Reverse sort. Useful to pipe into fzf")
-	scores := flag.Bool("s", false, "Show rank scores")
+	version := flag.BoolP("version", "v", false, "View version")
+	init := flag.BoolP("init", "", false, "Initialize fasder. Flags: zsh-hook aliases zsh-aliases, or auto for all  ")
+	execCmd := flag.StringP("exec", "e", "", "Execute provided command against best match")
+	list := flag.BoolP("list", "l", false, "List only. Omit rankings")
+	reverse := flag.BoolP("reverse", "R", false, "Reverse sort. Useful to pipe into fzf")
+	scores := flag.BoolP("s", "s", false, "Show rank scores")
 
-	filesOnly := flag.Bool("f", false, "Files only")
-	dirsOnly := flag.Bool("d", false, "Dirs only")
+	filesOnly := flag.BoolP("files", "f", false, "Files only")
+	dirsOnly := flag.BoolP("directories", "d", false, "Dirs only")
 
 	flag.Parse()
 
