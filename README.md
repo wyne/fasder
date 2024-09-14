@@ -93,21 +93,22 @@ Flags
 ```bash
 fasder [options] [query ...]
   options:
-    -l         list paths without scores
-    -e <cmd>   set command to execute on the result file
-    -d         match directories only
-    -f         match files only
-    -r         reverse listing order
-    -h         show a brief help message
+        --init          Initialize fasder. Args: auto aliases
+    -d, --directories   Dirs only
+    -e, --exec <cmd>    Execute provided command against best match
+    -f, --files         Files only
+    -h, --help          Show this message
+    -l, --list          List only. Omit rankings
+    -R, --reverse       Reverse sort. Useful to pipe into fzf
+    -s, --s             Show rank scores
+    -v, --version       View version
 
-fasder [-A|-D] [paths ...]
-    -A    add paths
-    -D    delete paths
+fasder [--add|--sanitize,--proc] [paths ...]
+  internal use:
+        --sanitize      Internal: Sanitize command before processing
+        --proc          Internal: Process a zsh-hook command
+    -A, --add string    Internal: Add path to the store
 ```
-
-- `-l` list paths without ranks
-- `-r` reverse the list
-- `-e {cmd}` execute {cmd} on the best match
 
 ## Compared to `zoxide`
 
