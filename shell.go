@@ -20,14 +20,14 @@ func aliases() {
     alias a='fasder'
     alias d='fasder -d'
     alias f='fasder -f'
-    alias v='fasder -f -e $EDITOR'
+    alias v='fasder -fe $EDITOR'
     `)
 
 	// j - Jump to best match. If no arguments, jump to previous directory
 	j := `
 	j() {
 	    if [ "$#" -gt 0 ]; then
-	        cd "$(fasder -d -e 'printf %s' "$1")" || return 1
+	        cd "$(fasder -de 'printf %s' "$1")" || return 1
 	    else
 	        cd -
 	    fi
@@ -40,7 +40,7 @@ func fzfAliases() {
 	fmt.Println(`
     jj () {
         local selection
-        selection=$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m --height=10)
+        selection=$(fasder -Rdl "$1" | fzf -1 -0 --no-sort +m --height=10)
         if [[ -n "$selection" ]]; then
             echo "Selection: $selection"
             cd "$selection" || return 1
@@ -55,7 +55,7 @@ func fzfAliases() {
     vv () {
       local selection
       # Get the selection from fasder and fzf
-      selection=$(fasder -r -f "$1" | fzf -1 -0 --no-sort +m --height=10)
+      selection=$(fasder -Rfl "$1" | fzf -1 -0 --no-sort +m --height=10)
       
       # Check if a selection was made
       if [[ -n "$selection" ]]; then
