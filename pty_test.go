@@ -6,11 +6,11 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/creack/pty"
+	"github.com/stretchr/testify/assert"
 )
 
 func setupPtyTest(t *testing.T) (func(), []string) {
@@ -73,12 +73,18 @@ func TestPty(t *testing.T) {
 		t.Fatalf("Command finished with error: %v", err)
 	}
 
+	// Normalize line endings for comparison
+	actualOutput := strings.ReplaceAll(output, "\r\n", "\n")
+
 	// Assert the output against the expectation
 	expectedOutput := strings.Join([]string{paths[0], paths[1]}, "\n")
-	trimmedOutput := strings.TrimSpace(output)
-	if !reflect.DeepEqual(trimmedOutput, expectedOutput) {
-		t.Errorf("Output mismatch: got \n'%v' \nwant\n'%v'", trimmedOutput, expectedOutput)
-	}
+	assert.Equal(t,
+		strings.TrimSpace(expectedOutput),
+		strings.TrimSpace(actualOutput),
+		"Output mismatch: got '%v', want '%v'",
+		actualOutput,
+		expectedOutput)
+
 }
 
 // readFromPty reads the output from the pty until EOF
