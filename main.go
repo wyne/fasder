@@ -83,8 +83,10 @@ func main() {
 	// to omit score ranks in output
 	if !term.IsTerminal(int(os.Stdout.Fd())) {
 		*list = true
-		bestMatch := []PathEntry{sortedEntries[len(sortedEntries)-1]}
-		displaySortedEntries(bestMatch, *list)
+		if len(sortedEntries) > 0 {
+			bestMatch := []PathEntry{sortedEntries[len(sortedEntries)-1]}
+			displaySortedEntries(bestMatch, *list)
+		}
 		return
 	}
 
