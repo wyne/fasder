@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/wyne/fasder/logger"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 // Global variable to hold the logger
@@ -81,7 +81,7 @@ func main() {
 	// If running in a subshell (ex: vim `f zsh`), only
 	// return one result, and auto apply -l list mode
 	// to omit score ranks in output
-	if !terminal.IsTerminal(int(os.Stdout.Fd())) {
+	if !term.IsTerminal(int(os.Stdout.Fd())) {
 		*list = true
 		bestMatch := []PathEntry{sortedEntries[len(sortedEntries)-1]}
 		displaySortedEntries(bestMatch, *list)
