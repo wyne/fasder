@@ -36,10 +36,6 @@ func main() {
 	files := *filesOnly || (!*filesOnly && !*dirsOnly)
 	dirs := *dirsOnly || (!*filesOnly && !*dirsOnly)
 
-	if !terminal.IsTerminal(int(os.Stdout.Fd())) {
-		*list = true
-	}
-
 	LoadFileStore()
 
 	// Commands
@@ -81,6 +77,13 @@ func main() {
 	matchingEntries := fuzzyFind(entries, searchTerm)
 	filteredEntries := filterEntries(matchingEntries, files, dirs)
 	sortedEntries := sortEntries(filteredEntries, *reverse)
+
+	if !terminal.IsTerminal(int(os.Stdout.Fd())) {
+		*list = true
+		bestMatch := []PathEntry{sortedEntries[len(sortedEntries)-1]}
+		displaySortedEntries(bestMatch, *list)
+		return
+	}
 
 	// Execute if necessary
 	if *execCmd != "" {
