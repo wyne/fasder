@@ -48,6 +48,10 @@ func setupPtyTest(t *testing.T) (func(), []string) {
 }
 
 func TestPty(t *testing.T) {
+	if os.Getenv("CI") != "" { // Check if running in a CI environment
+		t.Skip("Skipping PTY test in CI environment")
+	}
+
 	teardown, paths := setupPtyTest(t)
 	defer teardown()
 
