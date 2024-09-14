@@ -2,79 +2,107 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 
 	"golang.org/x/term"
 )
 
-func TestSubshellDetection(t *testing.T) {
-	// Backup original stdout
+func redirectStdout() (*os.File, *os.File, *os.File, error) {
 	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
+	r, w, err := os.Pipe()
+	if err != nil {
+		return nil, nil, nil, err
+	}
 	os.Stdout = w
+	return oldStdout, r, w, nil
+}
 
-	// Simulate non-terminal stdout
+func setupTest(t *testing.T) (func(), *os.File, *os.File, []string) {
+	originalArgs := os.Args
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+
+	oldStdout, r, w, err := redirectStdout()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	if term.IsTerminal(int(w.Fd())) {
 		t.Fatal("Expected non-terminal stdout")
 	}
 
-	// Create temporary files
 	tempFile1, err := os.CreateTemp("", "file1")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(tempFile1.Name())
 
 	tempFile2, err := os.CreateTemp("", "file2")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(tempFile2.Name())
 
-	// Mock data for testing with real file paths
 	mockData := fmt.Sprintf("%s|1.0|1627849200\n%s|2.0|1627849201", tempFile1.Name(), tempFile2.Name())
 
-	// Use a temporary file for testing
-	tempFile, err := os.CreateTemp("", "fasder_test")
+	tempData, err := os.CreateTemp("", "fasder_test")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(tempFile.Name())
 
-	// Write mock data to the temporary file
-	if _, err := tempFile.WriteString(mockData); err != nil {
+	if _, err := tempData.WriteString(mockData); err != nil {
 		t.Fatal(err)
 	}
-	tempFile.Close()
+	tempData.Close()
 
-	// Set the environment variable to use the temporary file
-	os.Setenv("_FASDER_DATA", tempFile.Name())
-	defer os.Unsetenv("_FASDER_DATA")
+	os.Setenv("_FASDER_DATA", tempData.Name())
 
-	// Load the mock data file
+	return func() {
+		os.Args = originalArgs
+		os.Stdout = oldStdout
+		os.Unsetenv("_FASDER_DATA")
+		os.Remove(tempFile1.Name())
+		os.Remove(tempFile2.Name())
+		os.Remove(tempData.Name())
+	}, r, w, []string{tempFile1.Name(), tempFile2.Name()}
+}
+
+func captureOutput(r *os.File) string {
+	var buf bytes.Buffer
+	buf.ReadFrom(r)
+	return buf.String()
+}
+
+func checkOutput(t *testing.T, r *os.File, expected []string) {
+	output := captureOutput(r)
+	lines := strings.Split(strings.TrimSpace(output), "\n")
+	if !reflect.DeepEqual(lines, expected) {
+		t.Errorf("Expected %v, but got %v", expected, lines)
+	}
+}
+
+func TestList(t *testing.T) {
+	teardown, r, w, paths := setupTest(t)
+	defer teardown()
+
 	LoadFileStore()
+	os.Args = []string{"cmd", "-m"}
+	main()
 
-	// Set up flags
+	w.Close()
+	checkOutput(t, r, []string{paths[0], paths[1]})
+}
+
+func TestSubshellDetection(t *testing.T) {
+	teardown, r, w, paths := setupTest(t)
+	defer teardown()
+
+	LoadFileStore()
 	os.Args = []string{"cmd"}
 	main()
 
-	// Capture output
 	w.Close()
-	var buf bytes.Buffer
-	buf.ReadFrom(r)
-	output := buf.String()
-
-	// Restore original stdout
-	os.Stdout = oldStdout
-
-	// Check if only one line is printed
-	lines := strings.Split(strings.TrimSpace(output), "\n")
-	if len(lines) == 1 && lines[0] == tempFile2.Name() {
-		// pass
-	} else {
-		t.Errorf("Expected one line of output, but got %d lines", len(lines))
-	}
+	checkOutput(t, r, []string{paths[1]})
 }

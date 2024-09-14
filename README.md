@@ -143,6 +143,21 @@ fasder -f     # files only
 
 Flags
 
+```bash
+fasder [options] [query ...]
+  options:
+    -l         list paths without scores
+    -e <cmd>   set command to execute on the result file
+    -d         match directories only
+    -f         match files only
+    -r         reverse listing order
+    -h         show a brief help message
+
+fasder [-A|-D] [paths ...]
+    -A    add paths
+    -D    delete paths
+```
+
 - `-l` list paths without ranks
 - `-r` reverse the list
 - `-e {cmd}` execute {cmd} on the best match
