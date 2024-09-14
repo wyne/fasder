@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	flag "github.com/spf13/pflag"
+	flag "github.com/cornfeedhobo/pflag"
 
 	"golang.org/x/term"
 )

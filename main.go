@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	flag "github.com/spf13/pflag"
+	flag "github.com/cornfeedhobo/pflag"
 	"github.com/wyne/fasder/logger"
 	"golang.org/x/term"
 )
