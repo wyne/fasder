@@ -55,7 +55,8 @@ jj foo          # =>    (interactive)
 j               # =>    cd - (back to previous directory)
 ```
 
-The default `v` and `vv` commands use the `$EDITOR` var instead of vim. Ex: `export EDITOR=nvim`.
+The provided `v` and `vv` commands execute with program set in `$EDITOR`.
+Configure with: `export EDITOR=nvim`.
 
 ## Usage
 
@@ -166,6 +167,7 @@ more use cases.
 - [x] Aliases
 - [ ] man page
 - [ ] Shell Support
+  - [x] Detect subshells
   - [x] zsh
     - [ ] autocomplete
   - [ ] bash
@@ -174,7 +176,6 @@ more use cases.
   - [x] Shell hook to rank during normal operations
   - [x] Increment score on execution with -e flag
   - [x] Decay
-  - [ ] Remove entries from file store on filtering
 - [ ] Matching
   - [x] Last segment matching
   - [x] Multiple path segment matching. Ex: {dir substr} {file substr} ([ref](https://github.com/clvv/fasd?tab=readme-ov-file#matching))
