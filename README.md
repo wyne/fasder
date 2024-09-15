@@ -90,7 +90,7 @@ fasder -f     # files only
 
 Flags
 
-```bash
+```
 fasder [options] [query ...]
   options:
         --init          Initialize fasder. Args: auto aliases
@@ -152,7 +152,7 @@ more use cases.
   - [ ] spotlight
   - [ ] recently used
 - [ ] Flags
-  - [x] `-r` reverse
+  - [x] `-R` reverse
   - [x] `-l` list paths without ranks
   - [x] `-f` files
   - [x] `-e` execute
