@@ -1,18 +1,19 @@
 # See: https://github.com/charmbracelet/vhs
 # Run with:
-# vhs util/demo.tape
+# vhs util/setup.tape
 
-Output demo.gif
+Output setup.gif
 
 Set Shell "zsh"
 
-Set FontSize 14
-Set Width 500
+Set FontSize 16
+Set Width 900
 Set Height 300
 Set Padding 20
 
 Require vim
 
+# ===== SETUP =====
 Hide
 Type "zsh --no-rcs"
 Enter
@@ -24,30 +25,22 @@ Type "clear"
 Enter
 Sleep 500ms
 Show
+# ===== END SETUP =====
 
 Sleep 1s
 
-Type "# reference a file once"
-Sleep 1s
-Enter
-Sleep 2s
-
-Type "ls abcdefg"
+# Populate db
+Type "echo 'Hello' > hello-file.txt"
 Sleep 1s
 Enter
 Sleep 2s
 
-Type "# fasder will remember it"
+Type "f hello # search recent files for hello"
 Sleep 1s
 Enter
 Sleep 2s
 
-Type "# find and open it with a substring"
-Sleep 1s
-Enter
-Sleep 2s
-
-Type "v abcd"
+Type "f -e vim hello # open the file in vim"
 Sleep 1s
 Enter
 Sleep 2s
@@ -56,25 +49,16 @@ Type ":q"
 Enter
 Sleep 1s
 
-Type "# it also works for directories"
+Type "which v"
 Sleep 1s
 Enter
 Sleep 2s
 
-Type "cd workspace"
-Sleep 1s
-Enter
-Sleep 2s
-
-Type "cd .."
-Sleep 1s
-Enter
-Sleep 2s
-
-Type "j work"
+Type "v hello # Productivity boost"
 Sleep 1s
 Enter
 Sleep 2s
 
 # End
 Sleep 2s
+

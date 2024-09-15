@@ -1,4 +1,26 @@
-# fasder - zoxide for files
+<div align="center">
+
+# Fasder - zoxide for files
+
+<!--
+[![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/wyne/fasder/total)](https://github.com/wyne/fasder/releases)
+-->
+
+Fasder let's you access **files and directories lightning quick**, inspired fasd.
+
+It remembers which files and directories you use most frequently, so you can access
+them in just a few keystrokes.<br />
+
+[Installation](#installation) •
+[Usage](#usage) •
+[Why Fasder?](#why-fasder) •
+[Features](#features)
+
+![Demo](./demo.gif)
+
+</div>
+
+<hr />
 
 Fasder is a modern reimagining of [clvv/fasd](http://github.com/clvv/fasd) that offers [zoxide](https://github.com/ajeetdsouza/zoxide)-style “frecent” (frequent + recent) access to files and directories.
 
@@ -6,9 +28,9 @@ Pronounced like “faster” with a ‘d’, Fasder tracks your most-used files 
 
 ### Key Benefits
 
--	Fast access: Open your frequently-used files and directories with just a few characters.
--	Minimal setup: Works out of the box with default aliases or customize it as you like.
--	Powerful shortcuts: Built-in commands let you launch, edit, and navigate effortlessly.
+- Fast access: Open your frequently-used files and directories with just a few characters.
+- Minimal setup: Works out of the box with default aliases or customize it as you like.
+- Powerful shortcuts: Built-in commands let you launch, edit, and navigate effortlessly.
 
 ### Examples
 
@@ -67,8 +89,6 @@ Configure with: `export EDITOR=nvim`.
 
 ## Base commands
 
-![Demo](./demo.gif)
-
 ```bash
 fasder {query}        # files and directories
 fasder -d {query}     # directories only
@@ -109,13 +129,13 @@ fasder [options] [query ...]
 
 Matching works similarly to zoxide and obeys the following rules:
 
-* The last word in the query must match the last segment of a path (split by "/" or ".").
-  * `conf` will match `workspace/conf` but not `conf/project`
-  * `conf yml` will match `config.yml` or `config/init.yml`
-* Query words are matched in order to paths
-  * `conf tmu` will match `config/tmux` but not `tmux/config.yml`.
-* Path segment matches do not have to be adjacent
-  * `work sub` will match `workspace/project/sub` 
+- The last word in the query must match the last segment of a path (split by "/" or ".").
+  - `conf` will match `workspace/conf` but not `conf/project`
+  - `conf yml` will match `config.yml` or `config/init.yml`
+- Query words are matched in order to paths
+  - `conf tmu` will match `config/tmux` but not `tmux/config.yml`.
+- Path segment matches do not have to be adjacent
+  - `work sub` will match `workspace/project/sub`
 
 ## Why fasder?
 
