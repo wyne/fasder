@@ -45,10 +45,13 @@ cp ~/.fasd ~/.fasder
 
 Pass `aliases` to init, example: `--init auto aliases`, to install these aliases:
 
--	`a` – tracks files and directories
--	`d` – directories only
--	`f` – files only
--	`v`, `vv`, `j`, `jj` – shortcuts for quick navigation and opening
+```bash
+a               # list files and directories
+d               # directories only
+f               # files only
+v, vv           # open file in $EDITOR, vv for interactive
+j, jj           # cd, jj for interactive
+```
 
 #### Example Commands
 
@@ -67,10 +70,24 @@ Configure with: `export EDITOR=nvim`.
 ![Demo](./demo.gif)
 
 ```bash
-fasder        # files and directories
-fasder -d     # directories only
-fasder -f     # files only
+fasder {query}        # files and directories
+fasder -d {query}     # directories only
+fasder -f {query}     # files only
+
+{query} can be left empty to return all results
 ```
+
+Example composition
+
+```bash
+alias a='fasder'        # both files and directories
+alias d='fasder -d'     # directories only
+alias f='fasder -f'     # files only
+alias v='f -e $EDITOR'  # open file with $EDITOR
+vim `f rc lo`           # on-the-fly command
+```
+
+See [shell.go](https://github.com/wyne/fasder/blob/main/shell.go) for provided aliases.
 
 #### Options
 
@@ -79,7 +96,7 @@ fasder [options] [query ...]
   options:
         --init          Initialize fasder. Args: auto aliases
     -d, --directories   Dirs only
-    -e, --exec <cmd>    Execute provided command against best match
+    -e, --exec {cmd}    Execute provided command against best match
     -f, --files         Files only
     -h, --help          Show this message
     -l, --list          List only. Omit rankings
@@ -87,6 +104,18 @@ fasder [options] [query ...]
     -s, --s             Show rank scores
     -v, --version       View version
 ```
+
+## Matching
+
+Matching works similarly to zoxide and obeys the following rules:
+
+* The last word in the query must match the last segment of a path (split by "/" or ".").
+  * `conf` will match `workspace/conf` but not `conf/project`
+  * `conf yml` will match `config.yml` or `config/init.yml`
+* Query words are matched in order to paths
+  * `conf tmu` will match `config/tmux` but not `tmux/config.yml`.
+* Path segment matches do not have to be adjacent
+  * `work sub` will match `workspace/project/sub` 
 
 ## Why fasder?
 
