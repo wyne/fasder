@@ -2,7 +2,7 @@
 
   # fasder - zoxide for files
 
-![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/wyne/fasder/total)
+[![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/wyne/fasder/total)](https://github.com/wyne/fasder/releases)
 
 fasder let's you access **files and directories lightning quick**, inspired fasd.
 
