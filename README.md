@@ -1,19 +1,20 @@
 <div align="center">
 
-# fasder - zoxide for files
+# Fasder - zoxide for files
 
+<!--
 [![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/wyne/fasder/total)](https://github.com/wyne/fasder/releases)
+-->
 
-fasder let's you access **files and directories lightning quick**, inspired fasd.
+Fasder let's you access **files and directories lightning quick**, inspired fasd.
 
 It remembers which files and directories you use most frequently, so you can access
 them in just a few keystrokes.<br />
 
 [Installation](#installation) •
 [Usage](#usage) •
-[Base Commands](#base-commands) •
 [Why Fasder?](#why-fasder) •
-[Features](#features) •
+[Features](#features)
 
 ![Demo](./demo.gif)
 
