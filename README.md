@@ -1,4 +1,24 @@
-# fasder - zoxide for files
+<div align="center">
+
+  # fasder - zoxide for files
+
+[![Downloads][downloads-badge]][releases]
+
+fasder let's you **access files and directories lightning quick**, inspired fasd.
+
+It remembers which files and directories you use most frequently, so you can access
+them in just a few keystrokes.<br />
+
+[Installation](#installation) •
+[Usage](#usage) •
+[Base Commands](#base-commands) •
+[Why Fasder?](#why-fasder) •
+[Features](#features) •
+
+</div>
+
+<hr />
+
 
 Fasder is a modern reimagining of [clvv/fasd](http://github.com/clvv/fasd) that offers [zoxide](https://github.com/ajeetdsouza/zoxide)-style “frecent” (frequent + recent) access to files and directories.
 
