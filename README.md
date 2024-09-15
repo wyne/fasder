@@ -1,165 +1,131 @@
-> [!WARNING]
-> This project is under active development and may have breaking changes without warning.
+# fasder - zoxide for files
 
-# fasder
+Fasder is a modern reimagining of [clvv/fasd](http://github.com/clvv/fasd) that offers [zoxide](https://github.com/ajeetdsouza/zoxide)-style “frecent” (frequent + recent) access to files and directories.
 
-This is a rewrite of [clvv/fasd](http://github.com/clvv/fasd) in go. This is primarily
-a learning project for myself, but may be useful to others one day.
+Pronounced like “faster” with a ‘d’, Fasder tracks your most-used files and directories and lets you access them with minimal keystrokes. Need to reopen your `.zshrc`? Just type `v zsh` and you’re there.
 
-Fasder, pronounced like "faster" but with a d, offers quick access to commonly
-used files and directories. Fasder tracks the files and directories you access
-and ranks them based on usage. You can then use the built in commands or
-construct your own to reference them with minimal keystrokes.
+### Key Benefits
 
-For example, once you've opened your zsh config once, you can then use something
-like `v zsh` or `v .z` to immediately run `nvim ~/.zshrc`. See the aliases section
-below to see how this works.
+-	Fast access: Open your frequently-used files and directories with just a few characters.
+-	Minimal setup: Works out of the box with default aliases or customize it as you like.
+-	Powerful shortcuts: Built-in commands let you launch, edit, and navigate effortlessly.
 
-![Demo](./demo.gif)
+### Examples
+
+```bash
+v def conf      # => vim /some/awkward/path/to/type/default.conf
+j abc           # => cd /hell/of/a/awkward/path/to/get/to/abcdef
+m movie         # => mplayer /path/to/awesome_movie.mp4
+vim `f rc lo`   # => vim /etc/rc.local
+```
 
 ## Installation
 
-Bare installation (create your own aliases):
+#### Basic Install:
 
 ```bash
 brew install wyne/tap/fasder
 echo 'eval "$(fasder --init auto)"' >> ~/.zshrc
 ```
 
-With default aliases `f`, `a`, `d`, `v`, `vv`, `j`, `jj` (see [aliases](#aliases)):
+#### Full Install (with dependencies and default aliases):
 
 ```bash
-brew install wyne/tap/fasder
+brew install wyne/tap/fasder fzf
 echo 'eval "$(fasder --init auto aliases)"' >> ~/.zshrc
 ```
 
-Migrate from `fasd`:
+#### Migrate from `fasd`:
 
 ```bash
 cp ~/.fasd ~/.fasder
 ```
 
-## Getting started
-
-```bash
-v def conf      # =>    vim /some/awkward/path/to/type/default.conf
-j abc           # =>    cd /hell/of/a/awkward/path/to/get/to/abcdef
-m movie         # =>    mplayer /whatever/whatever/whatever/awesome_movie.mp4
-o eng paper     # =>    xdg-open /you/dont/remember/where/english_paper.pdf
-vim `f rc lo`   # =>    vim /etc/rc.local
-vim `f rc conf` # =>    vim /etc/rc.conf
-
-v zsh           # =>    vim /commonly/used/file/.zshrc
-vv foo          # =>    (interactive)
-j foo           # =>    cd /commonly/used/path/foo
-jj foo          # =>    (interactive)
-j               # =>    cd - (back to previous directory)
-```
-
-The default `v` and `vv` commands use the `$EDITOR` var instead of vim. Ex: `export EDITOR=nvim`.
-
 ## Usage
 
-### Aliases
+Pass `aliases` to init, example: `--init auto aliases`, to install these aliases:
 
-These aliases are installed by passing `aliases` as an init parameter.
-Example: `--init auto aliases`.
+```bash
+a               # list files and directories
+d               # directories only
+f               # files only
+v, vv           # open file in $EDITOR, vv for interactive
+j, jj           # cd, jj for interactive
+```
+
+#### Example Commands
+
+```bash
+v def conf      # vim /awkward/path/default.conf
+j abc           # cd /awkward/path/abcdef
+vv foo          # Interactive file selection with fzf
+jj foo          # Interactive directory navigation with fzf
+```
+
+The provided `v` and `vv` commands execute with program set in `$EDITOR`.
+Configure with: `export EDITOR=nvim`.
+
+## Base commands
+
+![Demo](./demo.gif)
+
+```bash
+fasder {query}        # files and directories
+fasder -d {query}     # directories only
+fasder -f {query}     # files only
+
+{query} can be left empty to return all results
+```
+
+Example composition
 
 ```bash
 alias a='fasder'        # both files and directories
 alias d='fasder -d'     # directories only
 alias f='fasder -f'     # files only
-
-# Open best file match in $EDITOR
-# Example: v {query}
-alias v='f -e $EDITOR'
-
-# Immediately cd to best match for query
-# Example: j {query}
-# Leave query empty to cd previous directory (cd -)
-j() {
-  if [ "$#" -gt 0 ]; then
-    cd "$(fasder -e 'printf %s' "$1")" || return 1
-  else
-    cd -
-  fi
-}
+alias v='f -e $EDITOR'  # open file with $EDITOR
+vim `f rc lo`           # on-the-fly command
 ```
 
-These interactive aliases require [fzf](https://github.com/junegunn/fzf).
+See [shell.go](https://github.com/wyne/fasder/blob/main/shell.go) for provided aliases.
 
-```bash
-# Interactive edit from list. Requires fzf
-# Example: vv zsh     # Interactive select from ranked files with fzf, then open in $EDITOR
-# Example: vv         # Leave query empty to select from full file list                     #
-vv() {
-  local selection
-  # Get the selection from fasder and fzf
-  selection=$(fasder -r -f -l "$1" | fzf -1 -0 --no-sort +m --height=10)
+#### Options
 
-  # Check if a selection was made
-  if [[ -n "$selection" ]]; then
-      # Ensure the editor is set and handle potential issues
-      if [[ -z "$EDITOR" ]]; then
-          echo "EDITOR environment variable is not set."
-          return 1
-      fi
-
-      # Use xargs with -r to prevent running the editor if no selection
-      echo "Selection: $selection"
-      echo "$selection" | xargs -r "$EDITOR"
-  else
-      echo "No selection made."
-      return 1
-  fi
-}
-
-# Interactive cd from list
-# Example: jj foo     # Interactive select from ranked files with fzf, then cd
-# Example: jj         # Leave query empty to select from full directory list
-jj () {
-  local selection
-  selection=$(fasder -r -d -l "$1" | fzf -1 -0 --no-sort +m --height=10)
-  if [[ -n "$selection" ]]; then
-    echo "Selection: $selection"
-    cd "$selection" || return 1
-  else
-    echo "No selection made"
-    return 1
-  fi
-}
+```
+fasder [options] [query ...]
+  options:
+        --init          Initialize fasder. Args: auto aliases
+    -d, --directories   Dirs only
+    -e, --exec {cmd}    Execute provided command against best match
+    -f, --files         Files only
+    -h, --help          Show this message
+    -l, --list          List only. Omit rankings
+    -R, --reverse       Reverse sort. Useful to pipe into fzf
+    -s, --s             Show rank scores
+    -v, --version       View version
 ```
 
-## Base commands
+## Matching
 
-These commands will query the database or show the full database when no
-query is provided. Results are ranked by usage.
+Matching works similarly to zoxide and obeys the following rules:
 
-```bash
-fasder        # both files and directories
-fasder -d     # directories only
-fasder -f     # files only
-```
+* The last word in the query must match the last segment of a path (split by "/" or ".").
+  * `conf` will match `workspace/conf` but not `conf/project`
+  * `conf yml` will match `config.yml` or `config/init.yml`
+* Query words are matched in order to paths
+  * `conf tmu` will match `config/tmux` but not `tmux/config.yml`.
+* Path segment matches do not have to be adjacent
+  * `work sub` will match `workspace/project/sub` 
 
-Flags
+## Why fasder?
 
-- `-l` list paths without ranks
-- `-r` reverse the list
-- `-e {cmd}` execute {cmd} on the best match
+#### vs. zoxide
 
-## Compared to `zoxide`
+`zoxide` is great for directories. Fasder goes further—giving you quick access to both directories and files.
 
-[zoxide](https://github.com/ajeetdsouza/zoxide) only works on directories.
-`Fasder` also works on files, allowing you to quickly access commonly used files as well.
+#### vs. fasd
 
-## Compared to `fasd`
-
-[clvv/fasd](http://github.com/clvv/fasd), the inspiration for `fasder`, has been
-archived and will no longer be expanded. Additionally, it was written as
-one large shell script which is difficult to read and maintain and contains no tests.
-
-`fasder` is written in a modern language that is easy to adapt and expand to meet
-more use cases.
+`fasd` inspired `fasder`, but it’s now archived and written as a single, dense shell script. Fasder is built in a modern language, making it easier to read, maintain, and expand for more use cases.
 
 # Features
 
@@ -167,6 +133,7 @@ more use cases.
 - [x] Aliases
 - [ ] man page
 - [ ] Shell Support
+  - [x] Detect subshells
   - [x] zsh
     - [ ] autocomplete
   - [ ] bash
@@ -175,10 +142,10 @@ more use cases.
   - [x] Shell hook to rank during normal operations
   - [x] Increment score on execution with -e flag
   - [x] Decay
-  - [ ] Remove entries from file store on filtering
 - [ ] Matching
   - [x] Last segment matching
-  - [x] Full path matching. Ex: {dir substr} {file substr} ([ref](https://github.com/clvv/fasd?tab=readme-ov-file#matching))
+  - [x] Multiple path segment matching. Ex: {dir substr} {file substr} ([ref](https://github.com/clvv/fasd?tab=readme-ov-file#matching))
+  - [ ] Full path matching. Ex: /some/dir/file
 - [ ] Backends
   - [x] `fasd` format in `~/.fasder`
   - [x] neovim
@@ -188,7 +155,7 @@ more use cases.
   - [ ] spotlight
   - [ ] recently used
 - [ ] Flags
-  - [x] `-r` reverse
+  - [x] `-R` reverse
   - [x] `-l` list paths without ranks
   - [x] `-f` files
   - [x] `-e` execute

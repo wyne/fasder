@@ -1,11 +1,13 @@
 package main
 
 import (
-	"flag"
 	"log"
+	"os"
 	"strings"
 
+	flag "github.com/cornfeedhobo/pflag"
 	"github.com/wyne/fasder/logger"
+	"golang.org/x/term"
 )
 
 // Global variable to hold the logger
@@ -15,19 +17,20 @@ func main() {
 	logger.InitLog()
 
 	// Internal flags
-	add := flag.String("add", "", "Internal: Add path to the store")
-	sanitize := flag.Bool("sanitize", false, "Internal: Sanitize command before processing")
-	proc := flag.Bool("proc", false, "Internal: Process a zsh-hook command")
+	add := flag.StringP("add", "A", "", "Internal: Add path to the store")
+	sanitize := flag.BoolP("sanitize", "", false, "Internal: Sanitize command before processing")
+	proc := flag.BoolP("proc", "", false, "Internal: Process a zsh-hook command")
 
 	// User flags
-	version := flag.Bool("v", false, "View version")
-	init := flag.Bool("init", false, "Initialize fasder. Flags: zsh-hook aliases zsh-aliases, or auto for all  ")
-	execCmd := flag.String("e", "", "Execute provided command against best match")
-	list := flag.Bool("l", false, "List only. Omit rankings")
-	reverse := flag.Bool("r", false, "Reverse sort. Useful to pipe into fzf")
+	version := flag.BoolP("version", "v", false, "View version")
+	init := flag.BoolP("init", "", false, "Initialize fasder. Args: auto aliases")
+	execCmd := flag.StringP("exec", "e", "", "Execute provided command against best match")
+	list := flag.BoolP("list", "l", false, "List only. Omit rankings")
+	reverse := flag.BoolP("reverse", "R", false, "Reverse sort. Useful to pipe into fzf")
+	scores := flag.BoolP("scores", "s", false, "Show rank scores")
 
-	filesOnly := flag.Bool("f", false, "Files only")
-	dirsOnly := flag.Bool("d", false, "Dirs only")
+	filesOnly := flag.BoolP("files", "f", false, "Files only")
+	dirsOnly := flag.BoolP("directories", "d", false, "Dirs only")
 
 	flag.Parse()
 
@@ -39,7 +42,7 @@ func main() {
 	// Commands
 
 	if *version {
-		println("0.1.4")
+		println("0.1.5")
 		return
 	}
 
@@ -76,10 +79,35 @@ func main() {
 	filteredEntries := filterEntries(matchingEntries, files, dirs)
 	sortedEntries := sortEntries(filteredEntries, *reverse)
 
+	var onlyOne bool
+	onlyOne = false
+
+	// to omit score ranks in output
+	if !term.IsTerminal(int(os.Stdout.Fd())) && !*list {
+		onlyOne = true
+	}
+
+	// If running in a subshell (ex: vim `f zsh`), only
+	// return one result, and auto apply -l list mode
+	// to omit score ranks in output
+	if !term.IsTerminal(int(os.Stdout.Fd())) {
+		*list = true
+	}
+
 	// Execute if necessary
 	if *execCmd != "" {
 		execute(sortedEntries, *execCmd)
+		return
+	}
+
+	if len(sortedEntries) == 0 {
+		return
+	}
+
+	if onlyOne {
+		bestMatch := []PathEntry{sortedEntries[len(sortedEntries)-1]}
+		displaySortedEntries(bestMatch, *list)
 	} else {
-		displaySortedEntries(sortedEntries, *list)
+		displaySortedEntries(sortedEntries, !*scores)
 	}
 }
