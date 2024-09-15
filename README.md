@@ -2,9 +2,9 @@
 
   # fasder - zoxide for files
 
-[![Downloads][downloads-badge]][releases]
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/wyne/fasder/total)
 
-fasder let's you **access files and directories lightning quick**, inspired fasd.
+fasder let's you access **files and directories lightning quick**, inspired fasd.
 
 It remembers which files and directories you use most frequently, so you can access
 them in just a few keystrokes.<br />
@@ -18,7 +18,6 @@ them in just a few keystrokes.<br />
 </div>
 
 <hr />
-
 
 Fasder is a modern reimagining of [clvv/fasd](http://github.com/clvv/fasd) that offers [zoxide](https://github.com/ajeetdsouza/zoxide)-style “frecent” (frequent + recent) access to files and directories.
 
