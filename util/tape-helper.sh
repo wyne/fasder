@@ -16,11 +16,11 @@ source $ZSH/oh-my-zsh.sh
 alias fasder=~/workspace/fasder/fasder
 
 j() {
-  if [ "$#" -gt 0 ]; then
-    fasder_cd -d $1
-  else
-    cd -
-  fi
+	if [ "$#" -gt 0 ]; then
+	  cd "$(fasder -de 'printf %s' "$1")" || return 1
+	else
+	  cd -
+	fi
 }
 
 alias a='fasder'

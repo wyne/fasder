@@ -1,6 +1,6 @@
 # See: https://github.com/charmbracelet/vhs
 # Run with:
-# vhs util/demo.tape
+# vhs util/setup.tape
 
 Output setup.gif
 

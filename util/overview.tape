@@ -1,10 +1,10 @@
 # See: https://github.com/charmbracelet/vhs
 # Run with:
-# vhs util/demo.tape
+# vhs util/overview.tape
 
 Output overview.gif
 
-Set Shell "zsh --no-rcs"
+Set Shell "zsh"
 
 Set FontSize 16
 Set Width 900
