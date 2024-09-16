@@ -16,12 +16,12 @@ func Init(args []string) {
 		switch initializer {
 		case "auto":
 			// TODO: Support other shells
-			zshHook()
+			fmt.Println(ZshHook())
 		case "zsh-hook":
-			zshHook()
+			fmt.Println(ZshHook())
 		case "aliases":
-			aliases()
-			fzfAliases()
+			fmt.Println(Aliases())
+			fmt.Println(fzfAliases())
 		}
 	}
 }
