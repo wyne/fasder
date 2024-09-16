@@ -27,12 +27,17 @@ Show
 
 Sleep 1s
 
+Type "# fasder provides aliases v, j, and others"
+Sleep 1s
+Enter
+Sleep 2s
+
 Type "# reference a file once"
 Sleep 1s
 Enter
 Sleep 2s
 
-Type "ls abcdefg"
+Type "ls reallyReallyLongFileName.txt"
 Sleep 1s
 Enter
 Sleep 2s
@@ -42,12 +47,7 @@ Sleep 1s
 Enter
 Sleep 2s
 
-Type "# find and open it with a substring"
-Sleep 1s
-Enter
-Sleep 2s
-
-Type "v abcd"
+Type "v really # => vim reallyReallyLongFileName.txt"
 Sleep 1s
 Enter
 Sleep 2s
@@ -59,22 +59,31 @@ Sleep 1s
 Type "# it also works for directories"
 Sleep 1s
 Enter
-Sleep 2s
+Sleep 1s
 
 Type "cd workspace"
-Sleep 1s
+Sleep 500ms
 Enter
-Sleep 2s
+Sleep 1s
 
 Type "cd .."
+Enter
+Sleep 500ms
+
+Type "j work # => cd ~/workspace"
 Sleep 1s
 Enter
 Sleep 2s
 
-Type "j work"
+Type "v really # this also works from here"
+Sleep 1s
+Enter
+Sleep 2s
+
+Type ":q"
 Sleep 1s
 Enter
 Sleep 2s
 
 # End
-Sleep 2s
+Sleep 3s
