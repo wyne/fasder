@@ -1,30 +1,22 @@
 package main
 
-import (
-	"fmt"
-)
-
-// zshHook will setup a zshell hook to run and update based on commands
-func zshHook() {
-	fmt.Printf(`
+// ZshHook will setup a zshell hook to run and update based on commands
+func ZshHook() string {
+	return `
     _fasder_preexec() {
       { eval "fasder --proc $(fasder --sanitize $2)"; } >> /dev/null 2>&1
     }
     autoload -Uz add-zsh-hook
     add-zsh-hook preexec _fasder_preexec
-    `)
+    `
 }
 
-func aliases() {
-	fmt.Println(`
+func Aliases() string {
+	return `
     alias a='fasder'
     alias d='fasder -d'
     alias f='fasder -f'
     alias v='fasder -fe $EDITOR'
-    `)
-
-	// j - Jump to best match. If no arguments, jump to previous directory
-	j := `
 	j() {
 	    if [ "$#" -gt 0 ]; then
 	        cd "$(fasder -de 'printf %s' "$@")" || return 1
@@ -33,11 +25,10 @@ func aliases() {
 	    fi
 	}
 	`
-	fmt.Println(j)
 }
 
-func fzfAliases() {
-	fmt.Println(`
+func fzfAliases() string {
+	return `
     jj () {
         local selection
         selection=$(fasder -Rdl "$@" | fzf -1 -0 --no-sort +m --height=10)
@@ -49,9 +40,6 @@ func fzfAliases() {
             return 1
         fi
     }
-    `)
-
-	fmt.Println(`
     vv () {
       local selection
       # Get the selection from fasder and fzf
@@ -73,5 +61,5 @@ func fzfAliases() {
           return 1
       fi
     }
-  `)
+  `
 }
