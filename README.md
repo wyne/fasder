@@ -6,7 +6,7 @@
 [![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/wyne/fasder/total)](https://github.com/wyne/fasder/releases)
 -->
 
-Fasder let's you access **files and directories lightning quick**.
+Fasder lets you access **files and directories lightning quick**.
 
 It remembers which files and directories you use most frequently, so you can access
 them in just a few keystrokes.<br />
@@ -24,12 +24,13 @@ them in just a few keystrokes.<br />
 
 Fasder is a modern reimagining of [clvv/fasd](http://github.com/clvv/fasd) that offers [zoxide](https://github.com/ajeetdsouza/zoxide)-style “frecent” (frequent + recent) access to files and directories.
 
-Pronounced like “faster”, Fasder tracks your most-used files and directories and lets you access them with minimal keystrokes. Need to reopen your `.zshrc`? Just type `v zsh` from any directory.
+Fasder tracks your most-used files and directories and lets you access them with minimal keystrokes. Need to reopen your `.zshrc`? Just type `v zsh` from any directory.
 
 ### Key Benefits
 
 - Fast access: Open your frequently-used files and directories with just a few characters.
 - Minimal setup: Works out of the box with default aliases or customize it as you like.
+- Works anywhere: Paths are always expanded in full so you can access from any directory.
 - Powerful shortcuts: Built-in commands let you launch, edit, and navigate effortlessly.
 
 ### Examples
