@@ -34,6 +34,7 @@ func fzfAliases() string {
         selection=$(fasder -Rdl "$@" | fzf -1 -0 --no-sort +m --height=10)
         if [[ -n "$selection" ]]; then
             echo "Selection: $selection"
+            echo "$selection" | xargs -r fasder --add
             cd "$selection" || return 1
         else
             echo "No selection made"
@@ -55,6 +56,7 @@ func fzfAliases() string {
           
           # Use xargs with -r to prevent running the editor if no selection
           echo "Selection: $selection"
+          echo "$selection" | xargs -r fasder --add
           echo "$selection" | xargs -r "$EDITOR"
       else
           echo "No selection made."
