@@ -150,41 +150,40 @@ Matching works similarly to zoxide and obeys the following rules:
 
 ## Features
 
-- [x] Brew Formulae (`brew install wyne/tap/fasder`)
-- [x] Aliases
-- [ ] man page
-- [ ] Shell Support
-  - [x] Detect subshells
-  - [x] zsh
-    - [ ] autocomplete
-  - [ ] bash
-  - [ ] tcsh
-- [ ] Ranking
-  - [x] Shell hook to rank during normal operations
-  - [x] Increment score on execution with -e flag
-  - [x] Decay
-- [ ] Matching
-  - [x] Last segment matching
-  - [x] Multiple path segment matching. Ex: {dir substr} {file substr} ([ref](https://github.com/clvv/fasd?tab=readme-ov-file#matching))
-  - [ ] Full path matching. Ex: /some/dir/file
-- [ ] Backends
-  - [x] `fasd` format in `~/.fasder`
-  - [x] neovim
-    - [x] plugin [fasder.nvim](https://github.com/wyne/fasder.nvim)
-    - [ ] shada
-  - [ ] vim - viminfo
-  - [ ] spotlight
-  - [ ] recently used
-- [ ] Flags
-  - [x] `-R` reverse
-  - [x] `-l` list paths without ranks
-  - [x] `-f` files
-  - [x] `-e` execute
-  - [ ] `-t` recent access only
-  - [ ] `-[0-9]` nth entry
-  - [ ] `-b` only use backend
-  - [ ] `-B` additional backend
-  - [ ] `-i` interactive
+| Feature                 | `fasd`                 | `fasder`                |
+| ----------------------- | ---------------------- | ----------------------- |
+| Brew formulae           | ❌                      | ✅ `wyne/tap/fasder`     |
+| Aliases                 | ✅ f, a, s, d, z        | ✅ f, a, d, j, jj, v, vv |
+| Man page                | ✅                      | ❌                       |
+| Shell support           | zsh, bash, tcsh        | zsh                     |
+| Detect sub-shells       | ✅                      | ✅                       |
+| **Ranking**             |                        |                         |
+| Shell Hooks             | ✅                      | ✅                       |
+| Incr. on exec (`-e`)    | ✅                      | ✅                       |
+| Decay                   | ✅                      | ✅                       |
+| Matching                | [link](#)              | [see matching](#)       |
+| Backends                | neovim, vim, spotlight | [neovim](#)             |
+| **Flags**               |                        |                         |
+| `-h` help               | ✅                      | ✅                       |
+| `-f` files              | ✅                      | ✅                       |
+| `-d` directories        | ✅                      | ✅                       |
+| `-a` all                | ✅                      | ✅                       |
+| `-e` execute            | ✅                      | ✅                       |
+| `-l` list without ranks | ✅                      | ✅                       |
+| `-t` recent access only | ✅                      | ❌                       |
+| `-b` specify backend    | ✅                      | ❌                       |
+| `-i` interactive        | ✅                      | ❌                       |
+| `-s` list ranks         | ✅                      | ✅                       |
+| `-r` sort by rank       | ✅                      | ❌                       |
+| `-[0-9]` nth entry      | ✅                      | ❌                       |
+| `-B` additional backend | ✅                      | ❌                       |
+| `-R` reverse            | ✅                      | ✅                       |
+| **Utility Flags**       |                        |                         |
+| `-A`, `--add`           | ✅                      | ✅                       |
+| `-D`, `--delete`        | ✅                      | ❌                       |
+| **Internal Flags**      |                        |                         |
+| `--sanitize`            | ✅                      | ✅                       |
+| `--proc`                | ✅                      | ✅                       |
 
 ## Building
 
