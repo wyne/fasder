@@ -126,7 +126,7 @@ fasder [options] [query ...]
     -v, --version       View version
 ```
 
-## Matching
+### Matching
 
 Matching works similarly to zoxide and obeys the following rules:
 
@@ -148,7 +148,7 @@ Matching works similarly to zoxide and obeys the following rules:
 
 `fasd` inspired `fasder`, but it’s now archived and written as a single, dense shell script. Fasder is built in a modern language, making it easier to read, maintain, and expand for more use cases.
 
-# Features
+## Features
 
 - [x] Brew Formulae (`brew install wyne/tap/fasder`)
 - [x] Aliases
@@ -185,3 +185,13 @@ Matching works similarly to zoxide and obeys the following rules:
   - [ ] `-b` only use backend
   - [ ] `-B` additional backend
   - [ ] `-i` interactive
+
+## Building
+
+### Prerequisites
+
+Download and install `go`: https://go.dev/doc/install
+
+### Build
+
+`go build` will output a `fasder` binary in the current directory.
