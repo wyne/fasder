@@ -180,7 +180,7 @@ Matching works similarly to zoxide and obeys the following rules:
 | `-R` reverse            | ✅                      | ✅                       |
 | **Utility Flags**       |                        |                         |
 | `-A`, `--add`           | ✅                      | ✅                       |
-| `-D`, `--delete`        | ✅                      | ❌                       |
+| `-D`, `--delete`        | ✅                      | ✅                       |
 | **Internal Flags**      |                        |                         |
 | `--sanitize`            | ✅                      | ✅                       |
 | `--proc`                | ✅                      | ✅                       |
