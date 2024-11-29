@@ -161,8 +161,8 @@ Matching works similarly to zoxide and obeys the following rules:
 | Shell Hooks             | ✅                      | ✅                       |
 | Incr. on exec (`-e`)    | ✅                      | ✅                       |
 | Decay                   | ✅                      | ✅                       |
-| Matching                | [link](#)              | [see matching](#)       |
-| Backends                | neovim, vim, spotlight | [neovim](#)             |
+| Matching                | [details](https://github.com/clvv/fasd#matching) | [see Matching](#matching) |
+| Backends                | neovim, vim, spotlight | [neovim](https://github.com/wyne/fasder.nvim) |
 | **Flags**               |                        |                         |
 | `-h` help               | ✅                      | ✅                       |
 | `-f` files              | ✅                      | ✅                       |
