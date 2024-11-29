@@ -18,6 +18,7 @@ func main() {
 
 	// Internal flags
 	add := flag.StringP("add", "A", "", "Internal: Add path to the store")
+	delete := flag.StringP("delete", "D", "", "Internal: Delete path from the store")
 	sanitize := flag.BoolP("sanitize", "", false, "Internal: Sanitize command before processing")
 	proc := flag.BoolP("proc", "", false, "Internal: Process a zsh-hook command")
 
@@ -63,6 +64,11 @@ func main() {
 
 	if *add != "" {
 		AddToStore(*add)
+		return
+	}
+
+	if *delete != "" {
+		DeleteFromStore(*delete)
 		return
 	}
 
