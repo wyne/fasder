@@ -20,15 +20,47 @@ import (
 var dataFile string
 
 func LoadFileStore() {
-	dataFile = os.Getenv("_FASDER_DATA")
-	if dataFile == "" {
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			// Silently return
-			return
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		// Silently return
+		return
+	}
+
+	options := []string{
+		os.Getenv("_FASDER_DATA"),
+		filepath.Join(homeDir, ".fasder"),
+		filepath.Join(os.Getenv("XDG_DATA_HOME"), "fasder", "data"),
+		filepath.Join(homeDir, ".local", "share", "fasder", "data"),
+	}
+
+	for _, option := range options {
+		if option != "" {
+			if _, err := os.Stat(option); err == nil {
+				dataFile = option
+				break
+			}
 		}
-		// Expand the ~ to the home directory
-		dataFile = filepath.Join(homeDir, ".fasder")
+	}
+
+	if dataFile == "" {
+		// No valid data file found, create one
+		if xdgDataHome := os.Getenv("XDG_DATA_HOME"); xdgDataHome != "" {
+			dataFile = filepath.Join(xdgDataHome, "fasder", "data")
+		} else {
+			dataFile = filepath.Join(homeDir, ".local", "share", "fasder", "data")
+		}
+
+		// Ensure the directory exists
+		if err := os.MkdirAll(filepath.Dir(dataFile), 0755); err != nil {
+			log.Fatalf("Failed to create directory: %v", err)
+		}
+
+		// Create the file
+		file, err := os.Create(dataFile)
+		if err != nil {
+			log.Fatalf("Failed to create data file: %v", err)
+		}
+		file.Close()
 	}
 
 	// Check if the file exists and is owned by the current user

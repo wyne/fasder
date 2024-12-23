@@ -126,7 +126,19 @@ fasder [options] [query ...]
     -v, --version       View version
 ```
 
-### Matching
+## Environment Variables
+
+Unlike `fasd`, `fasder` has support for [XDG Base Directories](https://specifications.freedesktop.org/basedir-spec/latest/) like `.config` and `.local/state`.
+
+### Data
+
+> `$XDG_DATA_HOME` defines the base directory relative to which user-specific data files should be stored. If `$XDG_DATA_HOME` is either not set or empty, a default equal to `$HOME/.local/share` should be used.
+
+### Configuration
+
+> `$XDG_CONFIG_HOME` defines the base directory relative to which user-specific configuration files should be stored. If `$XDG_CONFIG_HOME` is either not set or empty, a default equal to `$HOME/.config` should be used.
+
+## Matching
 
 Matching works similarly to zoxide and obeys the following rules:
 
