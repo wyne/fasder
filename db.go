@@ -51,6 +51,16 @@ func sortEntries(entries []PathEntry, reverse bool) []PathEntry {
 	return entries
 }
 
+func sortEntriesByRank(entries []PathEntry, reverse bool) []PathEntry {
+	sort.Slice(entries, func(i, j int) bool {
+		if reverse {
+			return entries[i].Rank > entries[j].Rank
+		}
+		return entries[i].Rank < entries[j].Rank
+	})
+	return entries
+}
+
 // Fuzzy find function that matches the search terms to the paths
 func fuzzyFind(entries []PathEntry, searchTerm string) []PathEntry {
 	// Collect matching entries

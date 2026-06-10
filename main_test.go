@@ -146,6 +146,24 @@ func TestDeleteNonExistentPath(t *testing.T) {
 	checkOutput(t, r, []string{paths[0], paths[1]})
 }
 
+func TestRankSort(t *testing.T) {
+	teardown, r, w, paths := setupTest(t)
+	defer teardown()
+
+	// mockData has paths[0] rank=1.0 lastAccessed=1627849200
+	//              paths[1] rank=2.0 lastAccessed=1627849201
+	// Default sort (frecency ascending): paths[0] first, paths[1] last
+	// -r sort (rank ascending):          paths[0] first, paths[1] last  (same here)
+	// -r -R sort (rank descending):      paths[1] first, paths[0] last
+	LoadFileStore()
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	os.Args = []string{"cmd", "-r", "-R", "-l"}
+	main()
+
+	w.Close()
+	checkOutput(t, r, []string{paths[1], paths[0]})
+}
+
 func TestDeleteMultiplePaths(t *testing.T) {
 	teardown, _, w, paths := setupTest(t)
 	defer teardown()
