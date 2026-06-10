@@ -146,6 +146,31 @@ func TestDeleteNonExistentPath(t *testing.T) {
 	checkOutput(t, r, []string{paths[0], paths[1]})
 }
 
+func TestPathWithSpaces(t *testing.T) {
+	teardown, r, w, _ := setupTest(t)
+	defer teardown()
+
+	// Create a temp file whose name contains a space
+	dir := t.TempDir()
+	spacedPath := dir + "/my file.txt"
+	if err := os.WriteFile(spacedPath, []byte{}, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	LoadFileStore()
+	AddToStore(spacedPath)
+
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	os.Args = []string{"cmd", "-l", "my"}
+	main()
+
+	w.Close()
+	output := captureOutput(r)
+	if !strings.Contains(output, spacedPath) {
+		t.Errorf("Expected output to contain %q, got: %q", spacedPath, output)
+	}
+}
+
 func TestXDGDataHome(t *testing.T) {
 	xdgDir := t.TempDir()
 	os.Setenv("XDG_DATA_HOME", xdgDir)

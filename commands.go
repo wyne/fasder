@@ -55,14 +55,14 @@ func Proc(args []string) {
 	// TODO: blacklists
 	// TODO: shifts?
 
-	Add(fmt.Sprintf("%s %s", cwd, strings.Join(args, " ")))
+	Add(append([]string{cwd}, args...))
 }
 
-func Add(args string) {
+func Add(args []string) {
 	var validPaths []string
 
 	// Iterate over the arguments and validate paths
-	for _, arg := range strings.Split(args, " ") {
+	for _, arg := range args {
 		if _, err := os.Stat(arg); err == nil {
 			validPaths = append(validPaths, arg)
 		}

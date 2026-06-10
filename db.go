@@ -169,12 +169,10 @@ func execute(entries []PathEntry, command string) {
 		bestMatch := entries[len(entries)-1]
 
 		// Increment rank
-		Add(bestMatch.Path)
+		Add([]string{bestMatch.Path})
 
 		// Execute the specified command on the top entry
-		cmdStr := fmt.Sprintf("%s %s", command, bestMatch.Path)
-		parts := strings.Split(cmdStr, " ")
-		cmd := exec.Command(parts[0], parts[1:]...)
+		cmd := exec.Command(command, bestMatch.Path)
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
