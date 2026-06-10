@@ -144,6 +144,28 @@ func writeFileStore(entries []PathEntry) {
 	}
 }
 
+// DeleteFromStore removes entries whose paths match any of the given paths
+func DeleteFromStore(paths []string) {
+	entries, err := readFileStore()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	toDelete := make(map[string]bool, len(paths))
+	for _, p := range paths {
+		toDelete[p] = true
+	}
+
+	filtered := entries[:0]
+	for _, entry := range entries {
+		if !toDelete[entry.Path] {
+			filtered = append(filtered, entry)
+		}
+	}
+
+	writeFileStore(filtered)
+}
+
 // AddToStore an entry to the store
 func AddToStore(path string) {
 	entries, err := readFileStore()
