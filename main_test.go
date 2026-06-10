@@ -107,3 +107,81 @@ func TestSubshellDetection(t *testing.T) {
 	w.Close()
 	checkOutput(t, r, []string{paths[1]})
 }
+
+func TestDeleteExistingPath(t *testing.T) {
+	teardown, r, w, paths := setupTest(t)
+	defer teardown()
+
+	LoadFileStore()
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	os.Args = []string{"cmd", "-D", paths[0], "-l"}
+	main()
+
+	// After delete, list should only contain paths[1]
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	os.Args = []string{"cmd", "-l"}
+	main()
+
+	w.Close()
+	checkOutput(t, r, []string{paths[1]})
+}
+
+func TestDeleteNonExistentPath(t *testing.T) {
+	teardown, r, w, paths := setupTest(t)
+	defer teardown()
+
+	LoadFileStore()
+
+	// Deleting a path not in the store is a no-op
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	os.Args = []string{"cmd", "-D", "/nonexistent/path", "-l"}
+	main()
+
+	// All original entries should still be present
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	os.Args = []string{"cmd", "-l"}
+	main()
+
+	w.Close()
+	checkOutput(t, r, []string{paths[0], paths[1]})
+}
+
+func TestRankSort(t *testing.T) {
+	teardown, r, w, paths := setupTest(t)
+	defer teardown()
+
+	// mockData has paths[0] rank=1.0 lastAccessed=1627849200
+	//              paths[1] rank=2.0 lastAccessed=1627849201
+	// Default sort (frecency ascending): paths[0] first, paths[1] last
+	// -r sort (rank ascending):          paths[0] first, paths[1] last  (same here)
+	// -r -R sort (rank descending):      paths[1] first, paths[0] last
+	LoadFileStore()
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	os.Args = []string{"cmd", "-r", "-R", "-l"}
+	main()
+
+	w.Close()
+	checkOutput(t, r, []string{paths[1], paths[0]})
+}
+
+func TestDeleteMultiplePaths(t *testing.T) {
+	teardown, _, w, paths := setupTest(t)
+	defer teardown()
+
+	LoadFileStore()
+
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	os.Args = []string{"cmd", "-D", paths[0], "-D", paths[1]}
+	main()
+
+	w.Close()
+
+	// Store should now be empty
+	entries, err := readFileStore()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 0 {
+		t.Errorf("Expected empty store, got %d entries", len(entries))
+	}
+}
