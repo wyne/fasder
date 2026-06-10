@@ -22,13 +22,19 @@ var dataFile string
 func LoadFileStore() {
 	dataFile = os.Getenv("_FASDER_DATA")
 	if dataFile == "" {
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			// Silently return
-			return
+		if xdgDataHome := os.Getenv("XDG_DATA_HOME"); xdgDataHome != "" {
+			dataFile = filepath.Join(xdgDataHome, "fasder", "fasder")
+			if err := os.MkdirAll(filepath.Dir(dataFile), 0700); err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			homeDir, err := os.UserHomeDir()
+			if err != nil {
+				// Silently return
+				return
+			}
+			dataFile = filepath.Join(homeDir, ".fasder")
 		}
-		// Expand the ~ to the home directory
-		dataFile = filepath.Join(homeDir, ".fasder")
 	}
 
 	// Check if the file exists and is owned by the current user

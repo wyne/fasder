@@ -146,6 +146,27 @@ func TestDeleteNonExistentPath(t *testing.T) {
 	checkOutput(t, r, []string{paths[0], paths[1]})
 }
 
+func TestXDGDataHome(t *testing.T) {
+	xdgDir := t.TempDir()
+	os.Setenv("XDG_DATA_HOME", xdgDir)
+	os.Unsetenv("_FASDER_DATA")
+	defer func() {
+		os.Unsetenv("XDG_DATA_HOME")
+	}()
+
+	LoadFileStore()
+
+	expectedPath := xdgDir + "/fasder/fasder"
+	if dataFile != expectedPath {
+		t.Errorf("Expected dataFile %q, got %q", expectedPath, dataFile)
+	}
+
+	// Directory should have been created
+	if _, err := os.Stat(xdgDir + "/fasder"); err != nil {
+		t.Errorf("XDG fasder directory not created: %v", err)
+	}
+}
+
 func TestRankSort(t *testing.T) {
 	teardown, r, w, paths := setupTest(t)
 	defer teardown()
