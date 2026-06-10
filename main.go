@@ -18,6 +18,7 @@ func main() {
 
 	// Internal flags
 	add := flag.StringP("add", "A", "", "Internal: Add path to the store")
+	delete := flag.StringArrayP("delete", "D", nil, "Delete path(s) from the store")
 	sanitize := flag.BoolP("sanitize", "", false, "Internal: Sanitize command before processing")
 	proc := flag.BoolP("proc", "", false, "Internal: Process a zsh-hook command")
 
@@ -27,6 +28,7 @@ func main() {
 	execCmd := flag.StringP("exec", "e", "", "Execute provided command against best match")
 	list := flag.BoolP("list", "l", false, "List only. Omit rankings")
 	reverse := flag.BoolP("reverse", "R", false, "Reverse sort. Useful to pipe into fzf")
+	rankSort := flag.BoolP("rank", "r", false, "Sort by rank only, ignoring recency")
 	scores := flag.BoolP("scores", "s", false, "Show rank scores")
 
 	filesOnly := flag.BoolP("files", "f", false, "Files only")
@@ -66,6 +68,11 @@ func main() {
 		return
 	}
 
+	if len(*delete) > 0 {
+		DeleteFromStore(*delete)
+		return
+	}
+
 	// Read from file store
 	entries, err := readFileStore()
 	if err != nil {
@@ -77,7 +84,12 @@ func main() {
 	logger.Log.Printf("Search term: %s", searchTerm)
 	matchingEntries := fuzzyFind(entries, searchTerm)
 	filteredEntries := filterEntries(matchingEntries, files, dirs)
-	sortedEntries := sortEntries(filteredEntries, *reverse)
+	var sortedEntries []PathEntry
+	if *rankSort {
+		sortedEntries = sortEntriesByRank(filteredEntries, *reverse)
+	} else {
+		sortedEntries = sortEntries(filteredEntries, *reverse)
+	}
 
 	var onlyOne bool
 	onlyOne = false
