@@ -1,6 +1,7 @@
 package main
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -116,4 +117,75 @@ func equalPathEntries(a, b []PathEntry) bool {
 		}
 	}
 	return true
+}
+
+func TestFrecentMultiplier(t *testing.T) {
+	now := int64(1_700_000_000)
+	tests := []struct {
+		name         string
+		lastAccessed int64
+		expected     float64
+	}{
+		{
+			name:         "within the last hour",
+			lastAccessed: now - 3599,
+			expected:     6,
+		},
+		{
+			name:         "within the last day",
+			lastAccessed: now - 86399,
+			expected:     4,
+		},
+		{
+			name:         "within the last week",
+			lastAccessed: now - 604799,
+			expected:     2,
+		},
+		{
+			name:         "older than a week",
+			lastAccessed: now - 604800,
+			expected:     1,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := frecentMultiplier(tt.lastAccessed, now)
+			if got != tt.expected {
+				t.Fatalf("Expected %v, but got %v", tt.expected, got)
+			}
+		})
+	}
+}
+
+func TestSortEntriesUsesFrecentScore(t *testing.T) {
+	now := int64(1_700_000_000)
+	entries := []PathEntry{
+		{Path: "/older-high-rank", Rank: 10, LastAccessed: now - 604800},
+		{Path: "/recent-low-rank", Rank: 2, LastAccessed: now - 10},
+		{Path: "/middle", Rank: 1, LastAccessed: now - 3600},
+	}
+
+	got := sortEntriesAt(entries, false, now)
+	actualPaths := []string{got[0].Path, got[1].Path, got[2].Path}
+	expectedPaths := []string{"/middle", "/older-high-rank", "/recent-low-rank"}
+	if !reflect.DeepEqual(actualPaths, expectedPaths) {
+		t.Fatalf("Expected %v, but got %v", expectedPaths, actualPaths)
+	}
+}
+
+func TestSortEntriesReversesFrecentScore(t *testing.T) {
+	now := int64(1_700_000_000)
+	entries := []PathEntry{
+		{Path: "/older-high-rank", Rank: 10, LastAccessed: now - 604800},
+		{Path: "/recent-low-rank", Rank: 2, LastAccessed: now - 10},
+		{Path: "/middle", Rank: 1, LastAccessed: now - 3600},
+	}
+
+	got := sortEntriesAt(entries, true, now)
+	actualPaths := []string{got[0].Path, got[1].Path, got[2].Path}
+	expectedPaths := []string{"/recent-low-rank", "/older-high-rank", "/middle"}
+	if !reflect.DeepEqual(actualPaths, expectedPaths) {
+		t.Fatalf("Expected %v, but got %v", expectedPaths, actualPaths)
+	}
 }
