@@ -32,6 +32,7 @@ func main() {
 	filesOnly := flag.BoolP("files", "f", false, "Files only")
 	dirsOnly := flag.BoolP("directories", "d", false, "Dirs only")
 
+	// CommandLine exits on parse errors in production; this return supports tests using ContinueOnError.
 	if err := flag.CommandLine.Parse(preserveCommandArgs(os.Args[1:])); err != nil {
 		return
 	}
@@ -119,7 +120,8 @@ func preserveCommandArgs(args []string) []string {
 		if arg == "--" {
 			return args
 		}
-		if arg != "--proc" && arg != "--sanitize" {
+		if arg != "--proc" && arg != "--sanitize" &&
+			!strings.HasPrefix(arg, "--proc=") && !strings.HasPrefix(arg, "--sanitize=") {
 			continue
 		}
 		if i+1 < len(args) && args[i+1] == "--" {

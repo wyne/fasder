@@ -186,6 +186,7 @@ func TestInternalCommandFlagsPreserveArguments(t *testing.T) {
 		wantProc     bool
 		wantSanitize bool
 		wantVersion  bool
+		wantExec     string
 		wantArgs     []string
 	}{
 		{
@@ -201,6 +202,18 @@ func TestInternalCommandFlagsPreserveArguments(t *testing.T) {
 			wantArgs: []string{"git", "status", "--short"},
 		},
 		{
+			name:     "proc equals form preserves an unknown flag",
+			args:     []string{"--proc=true", "git", "status", "--short"},
+			wantProc: true,
+			wantArgs: []string{"git", "status", "--short"},
+		},
+		{
+			name:     "proc preserves a value-consuming Fasder flag",
+			args:     []string{"--proc", "vim", "-e", "foo"},
+			wantProc: true,
+			wantArgs: []string{"vim", "-e", "foo"},
+		},
+		{
 			name:         "sanitize preserves command flags",
 			args:         []string{"--sanitize", "vim", "--help"},
 			wantSanitize: true,
@@ -211,6 +224,18 @@ func TestInternalCommandFlagsPreserveArguments(t *testing.T) {
 			args:     []string{"--proc", "--", "echo", "--version"},
 			wantProc: true,
 			wantArgs: []string{"echo", "--version"},
+		},
+		{
+			name:     "command delimiter survives injection",
+			args:     []string{"--proc", "git", "log", "--", "README.md"},
+			wantProc: true,
+			wantArgs: []string{"git", "log", "--", "README.md"},
+		},
+		{
+			name:     "proc without arguments",
+			args:     []string{"--proc"},
+			wantProc: true,
+			wantArgs: []string{},
 		},
 		{
 			name:     "delimiter before proc keeps it positional",
@@ -231,6 +256,7 @@ func TestInternalCommandFlagsPreserveArguments(t *testing.T) {
 			proc := flags.Bool("proc", false, "")
 			sanitize := flags.Bool("sanitize", false, "")
 			version := flags.Bool("version", false, "")
+			execCmd := flags.StringP("exec", "e", "", "")
 
 			if err := flags.Parse(preserveCommandArgs(tt.args)); err != nil {
 				t.Fatal(err)
@@ -243,6 +269,9 @@ func TestInternalCommandFlagsPreserveArguments(t *testing.T) {
 			}
 			if *version != tt.wantVersion {
 				t.Fatalf("Expected version=%v, but got %v", tt.wantVersion, *version)
+			}
+			if *execCmd != tt.wantExec {
+				t.Fatalf("Expected exec=%q, but got %q", tt.wantExec, *execCmd)
 			}
 			if !reflect.DeepEqual(flags.Args(), tt.wantArgs) {
 				t.Fatalf("Expected args %v, but got %v", tt.wantArgs, flags.Args())
