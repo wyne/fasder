@@ -32,7 +32,9 @@ func main() {
 	filesOnly := flag.BoolP("files", "f", false, "Files only")
 	dirsOnly := flag.BoolP("directories", "d", false, "Dirs only")
 
-	flag.Parse()
+	if err := flag.CommandLine.Parse(preserveCommandArgs(os.Args[1:])); err != nil {
+		return
+	}
 
 	files := *filesOnly || (!*filesOnly && !*dirsOnly)
 	dirs := *dirsOnly || (!*filesOnly && !*dirsOnly)
@@ -110,4 +112,25 @@ func main() {
 	} else {
 		displaySortedEntries(sortedEntries, !*scores)
 	}
+}
+
+func preserveCommandArgs(args []string) []string {
+	for i, arg := range args {
+		if arg == "--" {
+			return args
+		}
+		if arg != "--proc" && arg != "--sanitize" {
+			continue
+		}
+		if i+1 < len(args) && args[i+1] == "--" {
+			return args
+		}
+
+		parsedArgs := make([]string, 0, len(args)+1)
+		parsedArgs = append(parsedArgs, args[:i+1]...)
+		parsedArgs = append(parsedArgs, "--")
+		return append(parsedArgs, args[i+1:]...)
+	}
+
+	return args
 }
