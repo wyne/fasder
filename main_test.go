@@ -158,6 +158,76 @@ func TestProcShiftsDefaultPrefixes(t *testing.T) {
 	}
 }
 
+func TestAddFlagNormalizesMultiplePaths(t *testing.T) {
+	originalArgs := os.Args
+	originalWd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	originalData := os.Getenv("_FASDER_DATA")
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+
+	tempDir := t.TempDir()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile("one", []byte("one"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Mkdir("nested", 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile("two", []byte("two"), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	dataPath := filepath.Join(tempDir, "fasder_data")
+	if err := os.WriteFile(dataPath, nil, 0600); err != nil {
+		t.Fatal(err)
+	}
+	os.Setenv("_FASDER_DATA", dataPath)
+	defer func() {
+		os.Args = originalArgs
+		if originalData == "" {
+			os.Unsetenv("_FASDER_DATA")
+		} else {
+			os.Setenv("_FASDER_DATA", originalData)
+		}
+		if err := os.Chdir(originalWd); err != nil {
+			t.Fatal(err)
+		}
+	}()
+
+	os.Args = []string{"cmd", "--add", "./one", "nested/../two"}
+	main()
+
+	entries, err := readFileStore()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedOne, err := filepath.Abs("./one")
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectedTwo, err := filepath.Abs("nested/../two")
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectedPaths := []string{
+		filepath.Clean(expectedOne),
+		filepath.Clean(expectedTwo),
+	}
+	var actualPaths []string
+	for _, entry := range entries {
+		actualPaths = append(actualPaths, entry.Path)
+	}
+	if !reflect.DeepEqual(actualPaths, expectedPaths) {
+		t.Fatalf("Expected %v, but got %v", expectedPaths, actualPaths)
+	}
+}
+
 func setupProcTest(t *testing.T) (string, func() []PathEntry) {
 	t.Helper()
 

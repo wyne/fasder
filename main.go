@@ -62,7 +62,7 @@ func main() {
 	}
 
 	if *add != "" {
-		AddToStore(*add)
+		AddPaths(append([]string{*add}, flag.Args()...))
 		return
 	}
 

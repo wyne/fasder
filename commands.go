@@ -74,14 +74,18 @@ func Proc(args []string) {
 	if len(args) > 0 {
 		paths = append(paths, args[1:]...)
 	}
-	Add(strings.Join(paths, " "))
+	AddPaths(paths)
 }
 
 func Add(args string) {
+	AddPaths(strings.Split(args, " "))
+}
+
+func AddPaths(args []string) {
 	var validPaths []string
 
 	// Iterate over the arguments and validate paths
-	for _, arg := range strings.Split(args, " ") {
+	for _, arg := range args {
 		if _, err := os.Stat(arg); err == nil {
 			validPaths = append(validPaths, arg)
 		}
