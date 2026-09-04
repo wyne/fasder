@@ -220,6 +220,8 @@ Matching works similarly to zoxide and obeys the following rules:
 | `--sanitize`            | ✅                      | ✅                       |
 | `--proc`                | ✅                      | ✅                       |
 
+Planned enhancements are tracked in [future-work.md](future-work.md).
+
 ## Building
 
 ### Prerequisites
