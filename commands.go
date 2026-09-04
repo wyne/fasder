@@ -10,6 +10,12 @@ import (
 	"github.com/wyne/fasder/logger"
 )
 
+const (
+	defaultBlacklist = "--help"
+	defaultShift     = "sudo busybox"
+	defaultIgnore    = "fasder ls echo"
+)
+
 // Initialization
 func Init(args []string) {
 	for _, initializer := range args {
@@ -51,11 +57,24 @@ func Proc(args []string) {
 		return
 	}
 
-	// TODO: ignores
-	// TODO: blacklists
-	// TODO: shifts?
+	if containsAny(args, configuredWords("_FASDER_BLACKLIST", defaultBlacklist)) {
+		return
+	}
 
-	Add(fmt.Sprintf("%s %s", cwd, strings.Join(args, " ")))
+	shiftCommands := configuredWords("_FASDER_SHIFT", defaultShift)
+	for len(args) > 0 && containsWord(shiftCommands, args[0]) {
+		args = args[1:]
+	}
+
+	if len(args) > 0 && containsWord(configuredWords("_FASDER_IGNORE", defaultIgnore), args[0]) {
+		return
+	}
+
+	paths := []string{cwd}
+	if len(args) > 0 {
+		paths = append(paths, args[1:]...)
+	}
+	AddPaths(paths)
 }
 
 func Add(args string) {
@@ -88,4 +107,30 @@ func AddPaths(args []string) {
 	for _, path := range absolutePaths {
 		AddToStore(path)
 	}
+}
+
+func configuredWords(name, defaultValue string) []string {
+	value := os.Getenv(name)
+	if value == "" {
+		value = defaultValue
+	}
+	return strings.Fields(value)
+}
+
+func containsAny(values, candidates []string) bool {
+	for _, value := range values {
+		if containsWord(candidates, value) {
+			return true
+		}
+	}
+	return false
+}
+
+func containsWord(words []string, target string) bool {
+	for _, word := range words {
+		if word == target {
+			return true
+		}
+	}
+	return false
 }

@@ -109,6 +109,82 @@ func TestSubshellDetection(t *testing.T) {
 	checkOutput(t, r, []string{paths[1]})
 }
 
+func TestProcIgnoresDefaultCommands(t *testing.T) {
+	_, readEntries := setupProcTest(t)
+
+	Proc([]string{"ls", "tracked"})
+
+	entries := readEntries()
+	if len(entries) != 0 {
+		t.Fatalf("Expected no entries, but got %v", entries)
+	}
+}
+
+func TestProcBlacklistsAnyToken(t *testing.T) {
+	_, readEntries := setupProcTest(t)
+
+	if err := os.WriteFile("tracked", []byte("tracked"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	Proc([]string{"vim", "--help", "tracked"})
+
+	entries := readEntries()
+	if len(entries) != 0 {
+		t.Fatalf("Expected no entries, but got %v", entries)
+	}
+}
+
+func TestProcShiftsDefaultPrefixes(t *testing.T) {
+	_, readEntries := setupProcTest(t)
+
+	Proc([]string{"sudo", "ls", "tracked"})
+
+	if entries := readEntries(); len(entries) != 0 {
+		t.Fatalf("Expected no entries, but got %v", entries)
+	}
+}
+
+func TestProcUsesConfiguredWords(t *testing.T) {
+	tests := []struct {
+		name  string
+		env   string
+		value string
+		args  []string
+	}{
+		{
+			name:  "blacklist",
+			env:   "_FASDER_BLACKLIST",
+			value: "blocked",
+			args:  []string{"vim", "blocked", "tracked"},
+		},
+		{
+			name:  "shift",
+			env:   "_FASDER_SHIFT",
+			value: "doas",
+			args:  []string{"doas", "ls", "tracked"},
+		},
+		{
+			name:  "ignore",
+			env:   "_FASDER_IGNORE",
+			value: "vim",
+			args:  []string{"vim", "tracked"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, readEntries := setupProcTest(t)
+			t.Setenv(tt.env, tt.value)
+
+			Proc(tt.args)
+
+			if entries := readEntries(); len(entries) != 0 {
+				t.Fatalf("Expected no entries, but got %v", entries)
+			}
+		})
+	}
+}
+
 func TestAddFlagNormalizesMultiplePaths(t *testing.T) {
 	originalArgs := os.Args
 	originalWd, err := os.Getwd()
@@ -300,10 +376,13 @@ func TestProcDoesNotConsumeFasderFlags(t *testing.T) {
 	if err := os.WriteFile(dataPath, nil, 0600); err != nil {
 		t.Fatal(err)
 	}
+	if err := os.WriteFile("tracked", []byte("tracked"), 0600); err != nil {
+		t.Fatal(err)
+	}
 	t.Setenv("_FASDER_DATA", dataPath)
 	flag.CommandLine = flag.NewFlagSet("fasder", flag.ContinueOnError)
 	flag.CommandLine.SetOutput(&bytes.Buffer{})
-	os.Args = []string{"fasder", "--proc", "echo", "--version"}
+	os.Args = []string{"fasder", "--proc", "vim", "--version", "tracked"}
 
 	t.Cleanup(func() {
 		os.Args = originalArgs
@@ -319,7 +398,56 @@ func TestProcDoesNotConsumeFasderFlags(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(entries) != 1 || entries[0].Path != cwd {
-		t.Fatalf("Expected proc to track %q, but got %v", cwd, entries)
+	expectedPaths := []string{cwd, filepath.Join(cwd, "tracked")}
+	var actualPaths []string
+	for _, entry := range entries {
+		actualPaths = append(actualPaths, entry.Path)
+	}
+	if !reflect.DeepEqual(actualPaths, expectedPaths) {
+		t.Fatalf("Expected proc to track %v, but got %v", expectedPaths, actualPaths)
+	}
+}
+
+func setupProcTest(t *testing.T) (string, func() []PathEntry) {
+	t.Helper()
+
+	originalWd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tempDir := t.TempDir()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatal(err)
+	}
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dataPath := filepath.Join(tempDir, "fasder_data")
+	if err := os.WriteFile(dataPath, nil, 0600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("_FASDER_DATA", dataPath)
+	// Empty means use the built-in defaults, pinning these tests to known lists.
+	t.Setenv("_FASDER_BLACKLIST", "")
+	t.Setenv("_FASDER_SHIFT", "")
+	t.Setenv("_FASDER_IGNORE", "")
+	LoadFileStore()
+
+	t.Cleanup(func() {
+		if err := os.Chdir(originalWd); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	return cwd, func() []PathEntry {
+		entries, err := readFileStore()
+		if err != nil {
+			t.Fatal(err)
+		}
+		return entries
 	}
 }
