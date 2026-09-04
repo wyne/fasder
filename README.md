@@ -126,10 +126,32 @@ fasder [options] [query ...]
     -v, --version       View version
 ```
 
-### Shell hook filtering
+### How shell tracking works
 
-Fasder filters commands before its shell hook updates the store. Ignored or
-blacklisted commands do not update any paths, including the current directory.
+When Fasder is initialized, its zsh hook observes each command before it runs.
+After sanitizing the command, the hook passes it back to Fasder through the
+internal `--proc` flag. For example, running:
+
+```bash
+vim ~/projects/fasder/main.go
+```
+
+effectively calls:
+
+```bash
+fasder --proc vim ~/projects/fasder/main.go
+```
+
+`--proc` does not execute the command and normally produces no output. It:
+
+1. Checks the entire command against `_FASDER_BLACKLIST`.
+2. Removes leading wrappers listed in `_FASDER_SHIFT`, such as `sudo`.
+3. Checks the executable against `_FASDER_IGNORE`.
+4. Removes the executable itself, such as `vim`.
+5. Adds the current directory and any valid path arguments to the store.
+
+Ignored or blacklisted commands do not update any paths, including the current
+directory. The filtering lists can be configured with these variables:
 
 | Variable            | Default          | Behavior                                      |
 | ------------------- | ---------------- | --------------------------------------------- |
