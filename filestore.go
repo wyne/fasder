@@ -181,3 +181,22 @@ func AddToStore(path string) {
 	// Write updated entries back to the file
 	writeFileStore(entries)
 }
+
+// DeleteFromStore removes an entry from the store
+func DeleteFromStore(path string) {
+	entries, err := readFileStore()
+	if err != nil {
+		return
+	}
+
+	// Find and remove the entry
+	for i, entry := range entries {
+		if entry.Path == path {
+			// Remove the entry by slicing
+			entries = append(entries[:i], entries[i+1:]...)
+			// Write updated entries back to the file
+			writeFileStore(entries)
+			return
+		}
+	}
+}
