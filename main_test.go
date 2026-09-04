@@ -135,26 +135,53 @@ func TestProcBlacklistsAnyToken(t *testing.T) {
 }
 
 func TestProcShiftsDefaultPrefixes(t *testing.T) {
-	cwd, readEntries := setupProcTest(t)
+	_, readEntries := setupProcTest(t)
 
-	if err := os.WriteFile("tracked", []byte("tracked"), 0600); err != nil {
-		t.Fatal(err)
+	Proc([]string{"sudo", "ls", "tracked"})
+
+	if entries := readEntries(); len(entries) != 0 {
+		t.Fatalf("Expected no entries, but got %v", entries)
 	}
-	expectedTracked, err := filepath.Abs("tracked")
-	if err != nil {
-		t.Fatal(err)
+}
+
+func TestProcUsesConfiguredWords(t *testing.T) {
+	tests := []struct {
+		name  string
+		env   string
+		value string
+		args  []string
+	}{
+		{
+			name:  "blacklist",
+			env:   "_FASDER_BLACKLIST",
+			value: "blocked",
+			args:  []string{"vim", "blocked", "tracked"},
+		},
+		{
+			name:  "shift",
+			env:   "_FASDER_SHIFT",
+			value: "doas",
+			args:  []string{"doas", "ls", "tracked"},
+		},
+		{
+			name:  "ignore",
+			env:   "_FASDER_IGNORE",
+			value: "vim",
+			args:  []string{"vim", "tracked"},
+		},
 	}
 
-	Proc([]string{"sudo", "vim", "tracked"})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, readEntries := setupProcTest(t)
+			t.Setenv(tt.env, tt.value)
 
-	entries := readEntries()
-	expectedPaths := []string{cwd, filepath.Clean(expectedTracked)}
-	var actualPaths []string
-	for _, entry := range entries {
-		actualPaths = append(actualPaths, entry.Path)
-	}
-	if !reflect.DeepEqual(actualPaths, expectedPaths) {
-		t.Fatalf("Expected %v, but got %v", expectedPaths, actualPaths)
+			Proc(tt.args)
+
+			if entries := readEntries(); len(entries) != 0 {
+				t.Fatalf("Expected no entries, but got %v", entries)
+			}
+		})
 	}
 }
 
@@ -404,6 +431,7 @@ func setupProcTest(t *testing.T) (string, func() []PathEntry) {
 		t.Fatal(err)
 	}
 	t.Setenv("_FASDER_DATA", dataPath)
+	// Empty means use the built-in defaults, pinning these tests to known lists.
 	t.Setenv("_FASDER_BLACKLIST", "")
 	t.Setenv("_FASDER_SHIFT", "")
 	t.Setenv("_FASDER_IGNORE", "")

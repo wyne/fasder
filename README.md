@@ -126,6 +126,19 @@ fasder [options] [query ...]
     -v, --version       View version
 ```
 
+### Shell hook filtering
+
+Fasder filters commands before its shell hook updates the store. Ignored or
+blacklisted commands do not update any paths, including the current directory.
+
+| Variable            | Default          | Behavior                                      |
+| ------------------- | ---------------- | --------------------------------------------- |
+| `_FASDER_BLACKLIST` | `--help`         | Skip commands containing any listed argument |
+| `_FASDER_SHIFT`     | `sudo busybox`   | Remove listed leading command wrappers       |
+| `_FASDER_IGNORE`    | `fasder ls echo` | Skip commands whose executable is listed     |
+
+Values are whitespace-separated. Export a variable to replace its default list.
+
 ### Matching
 
 Matching works similarly to zoxide and obeys the following rules:
