@@ -228,6 +228,159 @@ func TestAddFlagNormalizesMultiplePaths(t *testing.T) {
 	}
 }
 
+func TestInternalCommandFlagsPreserveArguments(t *testing.T) {
+	tests := []struct {
+		name         string
+		args         []string
+		wantProc     bool
+		wantSanitize bool
+		wantVersion  bool
+		wantExec     string
+		wantArgs     []string
+	}{
+		{
+			name:     "proc preserves a Fasder flag",
+			args:     []string{"--proc", "echo", "--version"},
+			wantProc: true,
+			wantArgs: []string{"echo", "--version"},
+		},
+		{
+			name:     "proc preserves an unknown flag",
+			args:     []string{"--proc", "git", "status", "--short"},
+			wantProc: true,
+			wantArgs: []string{"git", "status", "--short"},
+		},
+		{
+			name:     "proc equals form preserves an unknown flag",
+			args:     []string{"--proc=true", "git", "status", "--short"},
+			wantProc: true,
+			wantArgs: []string{"git", "status", "--short"},
+		},
+		{
+			name:     "proc preserves a value-consuming Fasder flag",
+			args:     []string{"--proc", "vim", "-e", "foo"},
+			wantProc: true,
+			wantArgs: []string{"vim", "-e", "foo"},
+		},
+		{
+			name:         "sanitize preserves command flags",
+			args:         []string{"--sanitize", "vim", "--help"},
+			wantSanitize: true,
+			wantArgs:     []string{"vim", "--help"},
+		},
+		{
+			name:     "existing delimiter remains unchanged",
+			args:     []string{"--proc", "--", "echo", "--version"},
+			wantProc: true,
+			wantArgs: []string{"echo", "--version"},
+		},
+		{
+			name:     "command delimiter survives injection",
+			args:     []string{"--proc", "git", "log", "--", "README.md"},
+			wantProc: true,
+			wantArgs: []string{"git", "log", "--", "README.md"},
+		},
+		{
+			name:     "proc without arguments",
+			args:     []string{"--proc"},
+			wantProc: true,
+			wantArgs: []string{},
+		},
+		{
+			name:     "delimiter before proc keeps it positional",
+			args:     []string{"--", "--proc", "echo"},
+			wantArgs: []string{"--proc", "echo"},
+		},
+		{
+			name:        "normal Fasder flags are unchanged",
+			args:        []string{"--version"},
+			wantVersion: true,
+			wantArgs:    []string{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			flags := flag.NewFlagSet("fasder", flag.ContinueOnError)
+			proc := flags.Bool("proc", false, "")
+			sanitize := flags.Bool("sanitize", false, "")
+			version := flags.Bool("version", false, "")
+			execCmd := flags.StringP("exec", "e", "", "")
+
+			if err := flags.Parse(preserveCommandArgs(tt.args)); err != nil {
+				t.Fatal(err)
+			}
+			if *proc != tt.wantProc {
+				t.Fatalf("Expected proc=%v, but got %v", tt.wantProc, *proc)
+			}
+			if *sanitize != tt.wantSanitize {
+				t.Fatalf("Expected sanitize=%v, but got %v", tt.wantSanitize, *sanitize)
+			}
+			if *version != tt.wantVersion {
+				t.Fatalf("Expected version=%v, but got %v", tt.wantVersion, *version)
+			}
+			if *execCmd != tt.wantExec {
+				t.Fatalf("Expected exec=%q, but got %q", tt.wantExec, *execCmd)
+			}
+			if !reflect.DeepEqual(flags.Args(), tt.wantArgs) {
+				t.Fatalf("Expected args %v, but got %v", tt.wantArgs, flags.Args())
+			}
+		})
+	}
+}
+
+func TestProcDoesNotConsumeFasderFlags(t *testing.T) {
+	originalArgs := os.Args
+	originalWd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	originalFlags := flag.CommandLine
+
+	tempDir := t.TempDir()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatal(err)
+	}
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	dataPath := filepath.Join(tempDir, "fasder_data")
+	if err := os.WriteFile(dataPath, nil, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile("tracked", []byte("tracked"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("_FASDER_DATA", dataPath)
+	flag.CommandLine = flag.NewFlagSet("fasder", flag.ContinueOnError)
+	flag.CommandLine.SetOutput(&bytes.Buffer{})
+	os.Args = []string{"fasder", "--proc", "vim", "--version", "tracked"}
+
+	t.Cleanup(func() {
+		os.Args = originalArgs
+		flag.CommandLine = originalFlags
+		if err := os.Chdir(originalWd); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	main()
+
+	entries, err := readFileStore()
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectedPaths := []string{cwd, filepath.Join(cwd, "tracked")}
+	var actualPaths []string
+	for _, entry := range entries {
+		actualPaths = append(actualPaths, entry.Path)
+	}
+	if !reflect.DeepEqual(actualPaths, expectedPaths) {
+		t.Fatalf("Expected proc to track %v, but got %v", expectedPaths, actualPaths)
+	}
+}
+
 func setupProcTest(t *testing.T) (string, func() []PathEntry) {
 	t.Helper()
 
