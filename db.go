@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/sahilm/fuzzy"
 )
@@ -18,37 +19,58 @@ type PathEntry struct {
 	LastAccessed int64 // Unix timestamp
 }
 
-// Sorting Methods
-
-type ByFrequencyThenRecency struct {
-	entries []PathEntry
-	reverse bool
+func sortEntries(entries []PathEntry, reverse bool) []PathEntry {
+	sortEntriesAt(entries, reverse, time.Now().Unix())
+	return entries
 }
 
-func (a ByFrequencyThenRecency) Len() int { return len(a.entries) }
-func (a ByFrequencyThenRecency) Swap(i, j int) {
+func sortEntriesAt(entries []PathEntry, reverse bool, now int64) []PathEntry {
+	sort.Sort(ByFrecentScore{entries, reverse, now})
+	return entries
+}
+
+type ByFrecentScore struct {
+	entries []PathEntry
+	reverse bool
+	now     int64
+}
+
+func (a ByFrecentScore) Len() int { return len(a.entries) }
+func (a ByFrecentScore) Swap(i, j int) {
 	a.entries[i], a.entries[j] = a.entries[j], a.entries[i]
 }
 
-func (a ByFrequencyThenRecency) Less(i, j int) bool {
+func (a ByFrecentScore) Less(i, j int) bool {
+	scoreI := frecentScore(a.entries[i], a.now)
+	scoreJ := frecentScore(a.entries[j], a.now)
 	if a.reverse {
-		// Sort in descending order
-		if a.entries[i].Rank != a.entries[j].Rank {
-			return a.entries[i].Rank > a.entries[j].Rank
+		if scoreI != scoreJ {
+			return scoreI > scoreJ
 		}
 		return a.entries[i].LastAccessed > a.entries[j].LastAccessed
-	} else {
-		// Sort in ascending order
-		if a.entries[i].Rank != a.entries[j].Rank {
-			return a.entries[i].Rank < a.entries[j].Rank
-		}
-		return a.entries[i].LastAccessed < a.entries[j].LastAccessed
 	}
+	if scoreI != scoreJ {
+		return scoreI < scoreJ
+	}
+	return a.entries[i].LastAccessed < a.entries[j].LastAccessed
 }
 
-func sortEntries(entries []PathEntry, reverse bool) []PathEntry {
-	sort.Sort(ByFrequencyThenRecency{entries, reverse})
-	return entries
+func frecentScore(entry PathEntry, now int64) float64 {
+	return entry.Rank * frecentMultiplier(entry.LastAccessed, now)
+}
+
+func frecentMultiplier(lastAccessed int64, now int64) float64 {
+	elapsed := now - lastAccessed
+	if elapsed < 3600 {
+		return 6
+	}
+	if elapsed < 86400 {
+		return 4
+	}
+	if elapsed < 604800 {
+		return 2
+	}
+	return 1
 }
 
 // Fuzzy find function that matches the search terms to the paths
