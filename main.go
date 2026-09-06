@@ -27,7 +27,7 @@ func main() {
 	execCmd := flag.StringP("exec", "e", "", "Execute provided command against best match")
 	list := flag.BoolP("list", "l", false, "List only. Omit rankings")
 	reverse := flag.BoolP("reverse", "R", false, "Reverse sort. Useful to pipe into fzf")
-	scores := flag.BoolP("scores", "s", false, "Show rank scores")
+	scores := flag.BoolP("scores", "s", false, "Show frecency scores")
 
 	filesOnly := flag.BoolP("files", "f", false, "Files only")
 	dirsOnly := flag.BoolP("directories", "d", false, "Dirs only")
