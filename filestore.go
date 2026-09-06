@@ -144,12 +144,33 @@ func writeFileStore(entries []PathEntry) {
 	}
 }
 
+// pruneDecayed drops entries whose rank has fallen below 1. This mirrors the
+// `$2 >= 1` pattern guarding fasd's add pass: lines under that threshold are
+// never read into its table, so they are not written back out. Decay is what
+// pushes entries under the line, and decayed values are written before being
+// filtered, so an entry survives one pass past the decay that sank it, exactly
+// as in fasd. Reads for queries are deliberately left unfiltered, matching
+// fasd's query pass, which has no such guard.
+func pruneDecayed(entries []PathEntry) []PathEntry {
+	kept := make([]PathEntry, 0, len(entries))
+
+	for _, entry := range entries {
+		if entry.Rank >= 1 {
+			kept = append(kept, entry)
+		}
+	}
+
+	return kept
+}
+
 // AddToStore an entry to the store
 func AddToStore(path string) {
 	entries, err := readFileStore()
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	entries = pruneDecayed(entries)
 
 	found := false
 	for i, entry := range entries {

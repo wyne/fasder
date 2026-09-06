@@ -545,3 +545,69 @@ func TestExecuteSplitsMultiWordCommand(t *testing.T) {
 		t.Fatalf("Expected %v, but got %v", expectedArgs, got)
 	}
 }
+
+func TestAddToStoreDropsDecayedEntries(t *testing.T) {
+	cwd, readEntries := setupProcTest(t)
+
+	faded := filepath.Join(cwd, "faded")
+	fresh := filepath.Join(cwd, "fresh")
+	for _, dir := range []string{faded, fresh} {
+		if err := os.MkdirAll(dir, 0700); err != nil {
+			t.Fatal(err)
+		}
+	}
+	writeFileStore([]PathEntry{
+		{Path: faded, Rank: 0.05, LastAccessed: time.Now().Unix()},
+		{Path: filepath.Join(cwd, "boundary"), Rank: 1, LastAccessed: time.Now().Unix()},
+	})
+
+	AddToStore(fresh)
+
+	var got []string
+	for _, entry := range readEntries() {
+		got = append(got, entry.Path)
+	}
+	expected := []string{filepath.Join(cwd, "boundary"), fresh}
+	if !reflect.DeepEqual(got, expected) {
+		t.Fatalf("Expected %v, but got %v", expected, got)
+	}
+}
+
+func TestAddToStoreResetsDecayedEntryInsteadOfBoosting(t *testing.T) {
+	cwd, readEntries := setupProcTest(t)
+
+	faded := filepath.Join(cwd, "faded")
+	if err := os.MkdirAll(faded, 0700); err != nil {
+		t.Fatal(err)
+	}
+	writeFileStore([]PathEntry{{Path: faded, Rank: 0.05, LastAccessed: time.Now().Unix()}})
+
+	// rank + 1/rank would send 0.05 to 20.05, leapfrogging genuinely frequent
+	// paths. fasd never sees a sub-1 rank here, so re-adding starts over at 1.
+	AddToStore(faded)
+
+	entries := readEntries()
+	if len(entries) != 1 || entries[0].Rank != 1 {
+		t.Fatalf("Expected a single entry with rank 1, but got %v", entries)
+	}
+}
+
+func TestQueriesStillSeeDecayedEntries(t *testing.T) {
+	cwd, _ := setupProcTest(t)
+
+	faded := filepath.Join(cwd, "faded")
+	if err := os.MkdirAll(faded, 0700); err != nil {
+		t.Fatal(err)
+	}
+	writeFileStore([]PathEntry{{Path: faded, Rank: 0.05, LastAccessed: time.Now().Unix()}})
+
+	// fasd's query pass has no `$2 >= 1` guard, so reads stay unfiltered and a
+	// decayed entry remains visible until the next add sweeps it away.
+	entries, err := readFileStore()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 1 || entries[0].Path != faded {
+		t.Fatalf("Expected the decayed entry to still be readable, but got %v", entries)
+	}
+}
