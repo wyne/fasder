@@ -184,38 +184,73 @@ func DeleteFromStore(paths []string) {
 	writeEntries(remaining)
 }
 
-// AddToStore an entry to the store
-func AddToStore(path string) {
+// pruneDecayed drops entries whose rank has fallen below 1. This mirrors the
+// `$2 >= 1` pattern guarding fasd's add pass: lines under that threshold are
+// never read into its table, so they are not written back out. Decay is what
+// pushes entries under the line, and decayed values are written before being
+// filtered, so an entry survives one pass past the decay that sank it, exactly
+// as in fasd. Reads for queries are deliberately left unfiltered, matching
+// fasd's query pass, which has no such guard.
+func pruneDecayed(entries []PathEntry) []PathEntry {
+	kept := make([]PathEntry, 0, len(entries))
+
+	for _, entry := range entries {
+		if entry.Rank >= 1 {
+			kept = append(kept, entry)
+		}
+	}
+
+	return kept
+}
+
+// AddToStore records the given paths in a single read-modify-write pass, the
+// way fasd's --add handles its whole argument list in one awk invocation.
+// Storing them one at a time would let the decay applied while writing the
+// first path drop it below 1, so the prune at the head of the next path's pass
+// would delete it before the operation finished. Repeated paths count once,
+// matching fasd, whose BEGIN block keys new entries by path.
+func AddToStore(paths ...string) {
 	entries, err := readFileStore()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	found := false
-	for i, entry := range entries {
-		if entry.Path == path {
-			logger.Log.Printf(
-				"Adding path: %s %v->%v",
-				path,
-				entries[i].Rank,
-				entries[i].Rank+1/entries[i].Rank,
-			)
-			entries[i].Rank = entries[i].Rank + 1/entries[i].Rank
+	entries = pruneDecayed(entries)
 
-			entries[i].LastAccessed = time.Now().Unix()
-			found = true
-			break
-		}
-	}
+	now := time.Now().Unix()
+	seen := make(map[string]bool, len(paths))
 
-	if !found {
-		// Add a new entry if the file hasn't been logged before
-		newEntry := PathEntry{
-			Path:         path,
-			Rank:         1,
-			LastAccessed: time.Now().Unix(),
+	for _, path := range paths {
+		if seen[path] {
+			continue
 		}
-		entries = append(entries, newEntry)
+		seen[path] = true
+
+		found := false
+		for i, entry := range entries {
+			if entry.Path == path {
+				logger.Log.Printf(
+					"Adding path: %s %v->%v",
+					path,
+					entries[i].Rank,
+					entries[i].Rank+1/entries[i].Rank,
+				)
+				entries[i].Rank = entries[i].Rank + 1/entries[i].Rank
+
+				entries[i].LastAccessed = now
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			// Add a new entry if the file hasn't been logged before
+			entries = append(entries, PathEntry{
+				Path:         path,
+				Rank:         1,
+				LastAccessed: now,
+			})
+		}
 	}
 
 	// Write updated entries back to the file

@@ -270,3 +270,46 @@ func TestCommandArgs(t *testing.T) {
 		})
 	}
 }
+
+func TestPruneDecayed(t *testing.T) {
+	tests := []struct {
+		name     string
+		entries  []PathEntry
+		expected []string
+	}{
+		{
+			name:     "rank of exactly one is kept",
+			entries:  []PathEntry{{Path: "/boundary", Rank: 1}},
+			expected: []string{"/boundary"},
+		},
+		{
+			name:     "rank just below one is dropped",
+			entries:  []PathEntry{{Path: "/sunk", Rank: 0.999}},
+			expected: []string{},
+		},
+		{
+			name: "only the decayed entries go",
+			entries: []PathEntry{
+				{Path: "/busy", Rank: 42},
+				{Path: "/faded", Rank: 0.05},
+				{Path: "/steady", Rank: 1.5},
+			},
+			expected: []string{"/busy", "/steady"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var got []string
+			for _, entry := range pruneDecayed(tt.entries) {
+				got = append(got, entry.Path)
+			}
+			if len(got) == 0 {
+				got = []string{}
+			}
+			if !reflect.DeepEqual(got, tt.expected) {
+				t.Fatalf("Expected %v, but got %v", tt.expected, got)
+			}
+		})
+	}
+}

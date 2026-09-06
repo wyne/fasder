@@ -123,9 +123,7 @@ func AddPaths(args []string) {
 		absolutePaths = append(absolutePaths, cleanPath)
 	}
 
-	for _, path := range absolutePaths {
-		AddToStore(path)
-	}
+	AddToStore(absolutePaths...)
 }
 
 func configuredWords(name, defaultValue string) []string {
