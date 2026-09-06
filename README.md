@@ -117,6 +117,7 @@ fasder [options] [query ...]
   options:
         --init          Initialize fasder. Args: auto aliases
     -d, --directories   Dirs only
+    -D, --delete {path} Delete path(s) from the store
     -e, --exec {cmd}    Execute provided command against best match
     -f, --files         Files only
     -h, --help          Show this message
@@ -216,7 +217,7 @@ Matching works similarly to zoxide and obeys the following rules:
 | `-R` reverse            | ✅                      | ✅                       |
 | **Utility Flags**       |                        |                         |
 | `-A`, `--add`           | ✅                      | ✅                       |
-| `-D`, `--delete`        | ✅                      | ❌                       |
+| `-D`, `--delete`        | ✅                      | ✅                       |
 | **Internal Flags**      |                        |                         |
 | `--sanitize`            | ✅                      | ✅                       |
 | `--proc`                | ✅                      | ✅                       |

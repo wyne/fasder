@@ -545,3 +545,127 @@ func TestExecuteSplitsMultiWordCommand(t *testing.T) {
 		t.Fatalf("Expected %v, but got %v", expectedArgs, got)
 	}
 }
+
+// storedPaths returns the paths currently in the store, in file order.
+func storedPaths(t *testing.T, readEntries func() []PathEntry) []string {
+	t.Helper()
+
+	var paths []string
+	for _, entry := range readEntries() {
+		paths = append(paths, entry.Path)
+	}
+	return paths
+}
+
+func seedStore(t *testing.T, cwd string, names ...string) []string {
+	t.Helper()
+
+	var seeded []string
+	for _, name := range names {
+		path := filepath.Join(cwd, name)
+		if err := os.MkdirAll(path, 0700); err != nil {
+			t.Fatal(err)
+		}
+		AddToStore(path)
+		seeded = append(seeded, path)
+	}
+	return seeded
+}
+
+func runMain(t *testing.T, args ...string) {
+	t.Helper()
+
+	originalArgs := os.Args
+	originalFlags := flag.CommandLine
+	t.Cleanup(func() {
+		os.Args = originalArgs
+		flag.CommandLine = originalFlags
+	})
+
+	flag.CommandLine = flag.NewFlagSet("fasder", flag.ContinueOnError)
+	flag.CommandLine.SetOutput(&bytes.Buffer{})
+	os.Args = append([]string{"fasder"}, args...)
+	main()
+}
+
+func TestDeleteAcceptsMultiplePositionalPaths(t *testing.T) {
+	cwd, readEntries := setupProcTest(t)
+	seeded := seedStore(t, cwd, "one", "two", "three")
+
+	// fasd's usage is `fasd [-A|-D] [paths ...]`, so every trailing argument
+	// is a path, not just the one attached to the flag.
+	runMain(t, "-D", seeded[0], seeded[1])
+
+	expected := []string{seeded[2]}
+	if got := storedPaths(t, readEntries); !reflect.DeepEqual(got, expected) {
+		t.Fatalf("Expected %v, but got %v", expected, got)
+	}
+}
+
+func TestDeleteAcceptsRepeatedFlags(t *testing.T) {
+	cwd, readEntries := setupProcTest(t)
+	seeded := seedStore(t, cwd, "one", "two", "three")
+
+	runMain(t, "-D", seeded[0], "-D", seeded[1])
+
+	expected := []string{seeded[2]}
+	if got := storedPaths(t, readEntries); !reflect.DeepEqual(got, expected) {
+		t.Fatalf("Expected %v, but got %v", expected, got)
+	}
+}
+
+func TestDeleteNormalizesPaths(t *testing.T) {
+	cwd, readEntries := setupProcTest(t)
+	seedStore(t, cwd, "one", "two", "three")
+
+	// Relative, dot-prefixed, and trailing-slash forms all have to resolve to
+	// the stored absolute path, the way fasd's normalization sed does.
+	runMain(t, "-D", "./one", "two/", filepath.Join("one", "..", "three"))
+
+	if got := storedPaths(t, readEntries); len(got) != 0 {
+		t.Fatalf("Expected an empty store, but got %v", got)
+	}
+}
+
+func TestDeleteCurrentDirectoryShorthand(t *testing.T) {
+	cwd, readEntries := setupProcTest(t)
+	seeded := seedStore(t, cwd, "one", "two")
+
+	if err := os.Chdir(seeded[0]); err != nil {
+		t.Fatal(err)
+	}
+	runMain(t, "-D", ".")
+
+	expected := []string{seeded[1]}
+	if got := storedPaths(t, readEntries); !reflect.DeepEqual(got, expected) {
+		t.Fatalf("Expected %v, but got %v", expected, got)
+	}
+}
+
+func TestDeleteRemovesStaleEntry(t *testing.T) {
+	cwd, readEntries := setupProcTest(t)
+	seeded := seedStore(t, cwd, "one", "two")
+
+	// Clearing entries for paths that no longer exist is the main reason to
+	// run this, so deletion must not check the filesystem.
+	if err := os.Remove(seeded[0]); err != nil {
+		t.Fatal(err)
+	}
+	runMain(t, "-D", seeded[0])
+
+	expected := []string{seeded[1]}
+	if got := storedPaths(t, readEntries); !reflect.DeepEqual(got, expected) {
+		t.Fatalf("Expected %v, but got %v", expected, got)
+	}
+}
+
+func TestDeleteUnknownPathLeavesStoreIntact(t *testing.T) {
+	cwd, readEntries := setupProcTest(t)
+	seeded := seedStore(t, cwd, "one", "two")
+
+	runMain(t, "-D", filepath.Join(cwd, "never-tracked"))
+
+	if got := storedPaths(t, readEntries); !reflect.DeepEqual(got, seeded) {
+		t.Fatalf("Expected %v, but got %v", seeded, got)
+	}
+}
