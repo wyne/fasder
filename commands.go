@@ -77,6 +77,29 @@ func Proc(args []string) {
 	AddPaths(paths)
 }
 
+// DeletePaths removes the given paths from the store. Paths are normalized the
+// same way AddPaths normalizes them, but unlike AddPaths they are not required
+// to still exist on disk: clearing entries for directories that are gone is the
+// main reason to run this. Mirrors fasd's -D, which reuses --add's
+// normalization and performs no existence check.
+func DeletePaths(args []string) {
+	var targets []string
+
+	for _, arg := range args {
+		if arg == "" {
+			continue
+		}
+		absPath, err := filepath.Abs(arg)
+		if err != nil {
+			fmt.Printf("Error converting path to absolute form: %v\n", err)
+			continue
+		}
+		targets = append(targets, absPath)
+	}
+
+	DeleteFromStore(targets)
+}
+
 func AddPaths(args []string) {
 	var validPaths []string
 
