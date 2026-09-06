@@ -6,14 +6,16 @@ import (
 	"path/filepath"
 )
 
-// Global variable to hold the logger
-var Log *log.Logger
-
 type NoOpWriter struct{}
 
 func (w *NoOpWriter) Write(p []byte) (int, error) {
 	return len(p), nil
 }
+
+// Global variable to hold the logger. It discards by default so that callers
+// reaching a log line before InitLog runs, which any test exercising the store
+// directly does, do not dereference a nil pointer.
+var Log = log.New(&NoOpWriter{}, "", 0)
 
 // Initialize the logger
 func InitLog() {

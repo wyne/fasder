@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -758,5 +759,59 @@ func TestQueriesStillSeeDecayedEntries(t *testing.T) {
 	}
 	if len(entries) != 1 || entries[0].Path != faded {
 		t.Fatalf("Expected the decayed entry to still be readable, but got %v", entries)
+	}
+}
+
+func TestAddPathsAppliesDecayOnceForTheWholeArgumentList(t *testing.T) {
+	cwd, readEntries := setupProcTest(t)
+
+	high := filepath.Join(cwd, "high")
+	first := filepath.Join(cwd, "first")
+	second := filepath.Join(cwd, "second")
+	for _, dir := range []string{high, first, second} {
+		if err := os.MkdirAll(dir, 0700); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// Sits above writeFileStore's 2000 threshold, so the write that stores the
+	// first path decays it to 0.9. Adding paths one at a time would let the
+	// next path's prune delete it mid-operation.
+	writeEntries([]PathEntry{{Path: high, Rank: 2001, LastAccessed: 100}})
+
+	AddPaths([]string{first, second})
+
+	// fasd's single awk pass writes 0.9*rank for everything in the table,
+	// newly added paths included, so all three survive at these ranks.
+	expected := map[string]float64{high: 1800.9, first: 0.9, second: 0.9}
+	entries := readEntries()
+	if len(entries) != len(expected) {
+		t.Fatalf("Expected %d entries, but got %v", len(expected), entries)
+	}
+	for _, entry := range entries {
+		want, ok := expected[entry.Path]
+		if !ok {
+			t.Fatalf("Unexpected entry %v", entry)
+		}
+		if math.Abs(entry.Rank-want) > 1e-6 {
+			t.Fatalf("Expected %s at rank %v, but got %v", entry.Path, want, entry.Rank)
+		}
+	}
+}
+
+func TestAddToStoreCountsRepeatedPathsOnce(t *testing.T) {
+	cwd, readEntries := setupProcTest(t)
+
+	repeated := filepath.Join(cwd, "repeated")
+	if err := os.MkdirAll(repeated, 0700); err != nil {
+		t.Fatal(err)
+	}
+
+	// fasd keys new entries by path in its BEGIN block, so a repeat within one
+	// invocation does not compound into an extra rank + 1/rank increment.
+	AddToStore(repeated, repeated)
+
+	entries := readEntries()
+	if len(entries) != 1 || entries[0].Rank != 1 {
+		t.Fatalf("Expected a single entry at rank 1, but got %v", entries)
 	}
 }
