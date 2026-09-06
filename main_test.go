@@ -669,3 +669,28 @@ func TestDeleteUnknownPathLeavesStoreIntact(t *testing.T) {
 		t.Fatalf("Expected %v, but got %v", seeded, got)
 	}
 }
+
+func TestDeleteDoesNotDecaySurvivingRanks(t *testing.T) {
+	cwd, readEntries := setupProcTest(t)
+	seeded := seedStore(t, cwd, "busy", "alsobusy", "stale")
+
+	// Push the survivors past writeFileStore's 2000 decay threshold. fasd's -D
+	// only filters the data file with sed, so deleting one path must not
+	// rescore the records that remain.
+	writeEntries([]PathEntry{
+		{Path: seeded[0], Rank: 1100, LastAccessed: 100},
+		{Path: seeded[1], Rank: 1000, LastAccessed: 200},
+		{Path: seeded[2], Rank: 100, LastAccessed: 300},
+	})
+
+	runMain(t, "-D", seeded[2])
+
+	entries := readEntries()
+	if len(entries) != 2 {
+		t.Fatalf("Expected 2 entries, but got %v", entries)
+	}
+	if entries[0].Rank != 1100 || entries[1].Rank != 1000 {
+		t.Fatalf("Expected ranks 1100 and 1000 to survive untouched, but got %v and %v",
+			entries[0].Rank, entries[1].Rank)
+	}
+}

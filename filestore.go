@@ -92,12 +92,9 @@ func readEntriesFromReader(r io.Reader) ([]PathEntry, error) {
 
 var mu sync.Mutex
 
+// writeFileStore ages the entries if they have grown past the rank threshold,
+// then writes them out.
 func writeFileStore(entries []PathEntry) {
-	mu.Lock() // Lock to prevent concurrent access
-	defer mu.Unlock()
-
-	tempPrefix := "fasder-"
-
 	var cumulativeRank float64
 	for _, entry := range entries {
 		cumulativeRank += entry.Rank
@@ -113,6 +110,18 @@ func writeFileStore(entries []PathEntry) {
 			entries[i].Rank *= decayFactor
 		}
 	}
+
+	writeEntries(entries)
+}
+
+// writeEntries replaces the data file atomically, leaving every rank alone.
+// Callers that must not rescore the store, such as deletion, use this directly:
+// fasd's -D only filters the data file with sed and never ages what survives.
+func writeEntries(entries []PathEntry) {
+	mu.Lock() // Lock to prevent concurrent access
+	defer mu.Unlock()
+
+	tempPrefix := "fasder-"
 
 	// Create a temporary file
 	tempFile, err := os.CreateTemp(filepath.Dir(dataFile), tempPrefix)
@@ -172,7 +181,7 @@ func DeleteFromStore(paths []string) {
 		return
 	}
 
-	writeFileStore(remaining)
+	writeEntries(remaining)
 }
 
 // AddToStore an entry to the store
