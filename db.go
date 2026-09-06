@@ -187,17 +187,32 @@ func bestEntry(entries []PathEntry, reverse bool) PathEntry {
 	return entries[len(entries)-1]
 }
 
+// Splits command the way a shell would and appends path as a single trailing
+// argument, so paths containing spaces survive. Mirrors fasd's `$exec "$last"`,
+// where the command word-splits but the quoted path does not. Returns nil when
+// command contains no words.
+func commandArgs(command string, path string) []string {
+	fields := strings.Fields(command)
+	if len(fields) == 0 {
+		return nil
+	}
+	return append(fields, path)
+}
+
 func execute(entries []PathEntry, command string, reverse bool) {
 	if len(entries) > 0 {
 		bestMatch := bestEntry(entries, reverse)
 
 		// Increment rank
-		Add(bestMatch.Path)
+		AddPaths([]string{bestMatch.Path})
 
 		// Execute the specified command on the top entry
-		cmdStr := fmt.Sprintf("%s %s", command, bestMatch.Path)
-		parts := strings.Split(cmdStr, " ")
-		cmd := exec.Command(parts[0], parts[1:]...)
+		args := commandArgs(command, bestMatch.Path)
+		if args == nil {
+			fmt.Println("No command provided.")
+			return
+		}
+		cmd := exec.Command(args[0], args[1:]...)
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr

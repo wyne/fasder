@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	flag "github.com/cornfeedhobo/pflag"
 
@@ -474,5 +475,73 @@ func setupProcTest(t *testing.T) (string, func() []PathEntry) {
 			t.Fatal(err)
 		}
 		return entries
+	}
+}
+
+// Writes a script that records each argument it receives, one per line, to the
+// file named by FASDER_TEST_ARGV. Returns the script path.
+func writeArgvRecorder(t *testing.T, dir string, logPath string) string {
+	t.Helper()
+
+	script := filepath.Join(dir, "record-argv")
+	body := "#!/bin/sh\n: > \"$FASDER_TEST_ARGV\"\nfor arg in \"$@\"; do printf '%s\\n' \"$arg\" >> \"$FASDER_TEST_ARGV\"; done\n"
+	if err := os.WriteFile(script, []byte(body), 0700); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("FASDER_TEST_ARGV", logPath)
+	return script
+}
+
+func recordedArgs(t *testing.T, logPath string) []string {
+	t.Helper()
+
+	data, err := os.ReadFile(logPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return strings.Split(strings.TrimSuffix(string(data), "\n"), "\n")
+}
+
+func TestExecutePassesSpacedPathAsSingleArgument(t *testing.T) {
+	cwd, readEntries := setupProcTest(t)
+
+	spaced := filepath.Join(cwd, "my file.txt")
+	if err := os.WriteFile(spaced, nil, 0600); err != nil {
+		t.Fatal(err)
+	}
+	logPath := filepath.Join(cwd, "argv.log")
+	script := writeArgvRecorder(t, cwd, logPath)
+
+	execute([]PathEntry{{Path: spaced, Rank: 1, LastAccessed: time.Now().Unix()}}, script, false)
+
+	expectedArgs := []string{spaced}
+	if got := recordedArgs(t, logPath); !reflect.DeepEqual(got, expectedArgs) {
+		t.Fatalf("Expected %v, but got %v", expectedArgs, got)
+	}
+
+	// The rank increment also has to survive the space.
+	entries := readEntries()
+	if len(entries) != 1 || entries[0].Path != spaced {
+		t.Fatalf("Expected the spaced path to be tracked, but got %v", entries)
+	}
+}
+
+func TestExecuteSplitsMultiWordCommand(t *testing.T) {
+	cwd, _ := setupProcTest(t)
+
+	spaced := filepath.Join(cwd, "my file.txt")
+	if err := os.WriteFile(spaced, nil, 0600); err != nil {
+		t.Fatal(err)
+	}
+	logPath := filepath.Join(cwd, "argv.log")
+	script := writeArgvRecorder(t, cwd, logPath)
+
+	// The j alias runs `fasder -de 'printf %s'`, so the command itself must
+	// keep word-splitting even while the path stays whole.
+	execute([]PathEntry{{Path: spaced, Rank: 1, LastAccessed: time.Now().Unix()}}, script+" --flag", false)
+
+	expectedArgs := []string{"--flag", spaced}
+	if got := recordedArgs(t, logPath); !reflect.DeepEqual(got, expectedArgs) {
+		t.Fatalf("Expected %v, but got %v", expectedArgs, got)
 	}
 }
