@@ -177,9 +177,19 @@ func filterEntries(entries []PathEntry, files bool, dirs bool) []PathEntry {
 	return filtered
 }
 
-func execute(entries []PathEntry, command string) {
+// Returns the highest scoring entry. sortEntries puts the best match last when
+// sorting normally and first when reversed, so the sort direction decides which
+// end to read. Callers must pass a non-empty slice.
+func bestEntry(entries []PathEntry, reverse bool) PathEntry {
+	if reverse {
+		return entries[0]
+	}
+	return entries[len(entries)-1]
+}
+
+func execute(entries []PathEntry, command string, reverse bool) {
 	if len(entries) > 0 {
-		bestMatch := entries[len(entries)-1]
+		bestMatch := bestEntry(entries, reverse)
 
 		// Increment rank
 		Add(bestMatch.Path)

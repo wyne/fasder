@@ -99,7 +99,7 @@ func main() {
 
 	// Execute if necessary
 	if *execCmd != "" {
-		execute(sortedEntries, *execCmd)
+		execute(sortedEntries, *execCmd, *reverse)
 		return
 	}
 
@@ -108,7 +108,7 @@ func main() {
 	}
 
 	if onlyOne {
-		bestMatch := []PathEntry{sortedEntries[len(sortedEntries)-1]}
+		bestMatch := []PathEntry{bestEntry(sortedEntries, *reverse)}
 		displaySortedEntries(bestMatch, *list)
 	} else {
 		displaySortedEntries(sortedEntries, !*scores)

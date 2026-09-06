@@ -109,6 +109,31 @@ func TestSubshellDetection(t *testing.T) {
 	checkOutput(t, r, []string{paths[1]})
 }
 
+func TestSubshellDetectionReversed(t *testing.T) {
+	teardown, r, w, paths := setupTest(t)
+	defer teardown()
+
+	LoadFileStore()
+	os.Args = []string{"cmd", "-R"}
+	main()
+
+	w.Close()
+	// -R reverses display order, but the single best match stays the same.
+	checkOutput(t, r, []string{paths[1]})
+}
+
+func TestExecuteUsesBestMatchWhenReversed(t *testing.T) {
+	teardown, r, w, paths := setupTest(t)
+	defer teardown()
+
+	LoadFileStore()
+	os.Args = []string{"cmd", "-R", "-e", "echo"}
+	main()
+
+	w.Close()
+	checkOutput(t, r, []string{paths[1]})
+}
+
 func TestProcIgnoresDefaultCommands(t *testing.T) {
 	_, readEntries := setupProcTest(t)
 
