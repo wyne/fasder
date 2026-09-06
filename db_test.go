@@ -132,9 +132,19 @@ func TestFrecentMultiplier(t *testing.T) {
 			expected:     6,
 		},
 		{
+			name:         "exactly one hour",
+			lastAccessed: now - 3600,
+			expected:     4,
+		},
+		{
 			name:         "within the last day",
 			lastAccessed: now - 86399,
 			expected:     4,
+		},
+		{
+			name:         "exactly one day",
+			lastAccessed: now - 86400,
+			expected:     2,
 		},
 		{
 			name:         "within the last week",

@@ -60,6 +60,7 @@ func frecentScore(entry PathEntry, now int64) float64 {
 }
 
 func frecentMultiplier(lastAccessed int64, now int64) float64 {
+	// Match original fasd's default rank * frecent(last_access) buckets.
 	elapsed := now - lastAccessed
 	if elapsed < 3600 {
 		return 6
