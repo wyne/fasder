@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestFuzzyFind(t *testing.T) {
@@ -201,18 +202,22 @@ func TestSortEntriesReversesFrecentScore(t *testing.T) {
 }
 
 func TestBestEntryIgnoresSortDirection(t *testing.T) {
+	now := time.Now().Unix()
+	// Frecency and raw rank disagree here: the fresher entry scores 2*6=12
+	// while the staler one scores 10*1=10. The best match is the frecency
+	// winner in both sort directions.
 	entries := []PathEntry{
-		{Path: "/low", Rank: 1, LastAccessed: 1627849200},
-		{Path: "/high", Rank: 2, LastAccessed: 1627849201},
+		{Path: "/high-rank-stale", Rank: 10, LastAccessed: now - 700000},
+		{Path: "/low-rank-fresh", Rank: 2, LastAccessed: now - 60},
 	}
 
 	ascending := sortEntries(append([]PathEntry(nil), entries...), false)
-	if got := bestEntry(ascending, false); got.Path != "/high" {
-		t.Fatalf("Expected /high, but got %v", got.Path)
+	if got := bestEntry(ascending, false); got.Path != "/low-rank-fresh" {
+		t.Fatalf("Expected /low-rank-fresh, but got %v", got.Path)
 	}
 
 	descending := sortEntries(append([]PathEntry(nil), entries...), true)
-	if got := bestEntry(descending, true); got.Path != "/high" {
-		t.Fatalf("Expected /high, but got %v", got.Path)
+	if got := bestEntry(descending, true); got.Path != "/low-rank-fresh" {
+		t.Fatalf("Expected /low-rank-fresh, but got %v", got.Path)
 	}
 }
