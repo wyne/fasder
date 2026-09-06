@@ -117,3 +117,20 @@ func equalPathEntries(a, b []PathEntry) bool {
 	}
 	return true
 }
+
+func TestBestEntryIgnoresSortDirection(t *testing.T) {
+	entries := []PathEntry{
+		{Path: "/low", Rank: 1, LastAccessed: 1627849200},
+		{Path: "/high", Rank: 2, LastAccessed: 1627849201},
+	}
+
+	ascending := sortEntries(append([]PathEntry(nil), entries...), false)
+	if got := bestEntry(ascending, false); got.Path != "/high" {
+		t.Fatalf("Expected /high, but got %v", got.Path)
+	}
+
+	descending := sortEntries(append([]PathEntry(nil), entries...), true)
+	if got := bestEntry(descending, true); got.Path != "/high" {
+		t.Fatalf("Expected /high, but got %v", got.Path)
+	}
+}
