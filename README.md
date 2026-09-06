@@ -209,7 +209,7 @@ Matching works similarly to zoxide and obeys the following rules:
 | Shell support           | zsh, bash, tcsh        | zsh                     |
 | Detect sub-shells       | ✅                      | ✅                       |
 | XDG base directories    | ❌ always `~/.fasd`     | ✅ [see Data file location](#data-file-location) |
-| Performance             | shell-script baseline  | faster in CLI benchmarks |
+| Performance             | shell-script baseline  | faster in [CLI benchmarks](#benchmarks) |
 | **Ranking**             |                        |                         |
 | Shell Hooks             | ✅                      | ✅                       |
 | Incr. on exec (`-e`)    | ✅                      | ✅                       |
@@ -251,7 +251,7 @@ Download and install `go`: https://go.dev/doc/install
 
 `go build` will output a `fasder` binary in the current directory.
 
-### Benchmark
+### Benchmarks
 
 Compare Fasder against the original shell script implementation:
 
@@ -260,9 +260,20 @@ util/bench-compare.sh
 ```
 
 The runner builds a temporary `fasder` binary, compares it with
-`~/workspace/clvv-fasd/fasd`, and generates identical synthetic stores for both
-tools. Configure it with:
+`fasd` from `PATH`, and generates identical synthetic stores for both tools.
+Configure it with:
 
 ```bash
 FASDER_BENCH_FASD=/path/to/fasd FASDER_BENCH_ENTRIES=2000 FASDER_BENCH_COUNT=5 util/bench-compare.sh
 ```
+
+Initial benchmark results with 2,000 synthetic entries on an Apple M2 Max:
+
+| Case | Fasder median | fasd median | Fasder speedup |
+| --- | ---: | ---: | ---: |
+| Broad list query | 13.9 ms | 297.0 ms | 21.4x |
+| Directory filter query | 7.6 ms | 51.9 ms | 6.9x |
+| File filter query | 7.0 ms | 51.8 ms | 7.4x |
+| Subshell best match | 11.6 ms | 306.5 ms | 26.5x |
+| Add new path | 15.0 ms | 31.8 ms | 2.1x |
+| Delete path | 14.0 ms | 20.2 ms | 1.4x |

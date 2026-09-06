@@ -2,13 +2,13 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-fasd_path="${FASDER_BENCH_FASD:-"$HOME/workspace/clvv-fasd/fasd"}"
+fasd_path="${FASDER_BENCH_FASD:-"$(command -v fasd || true)"}"
 entries="${FASDER_BENCH_ENTRIES:-2000}"
 count="${FASDER_BENCH_COUNT:-5}"
 
 if [[ ! -x "$fasd_path" ]]; then
-  echo "Original fasd script not found or not executable: $fasd_path" >&2
-  echo "Set FASDER_BENCH_FASD=/path/to/fasd and retry." >&2
+  echo "Original fasd script not found on PATH." >&2
+  echo "Install fasd or set FASDER_BENCH_FASD=/path/to/fasd and retry." >&2
   exit 1
 fi
 
