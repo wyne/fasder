@@ -122,7 +122,7 @@ fasder [options] [query ...]
     -h, --help          Show this message
     -l, --list          List only. Omit rankings
     -R, --reverse       Reverse sort. Useful to pipe into fzf
-    -s, --s             Show rank scores
+    -s, --s             Show frecency scores
     -v, --version       View version
 ```
 
@@ -195,6 +195,7 @@ Matching works similarly to zoxide and obeys the following rules:
 | **Ranking**             |                        |                         |
 | Shell Hooks             | ✅                      | ✅                       |
 | Incr. on exec (`-e`)    | ✅                      | ✅                       |
+| Frecency                | ✅                      | ✅                       |
 | Decay                   | ✅                      | ✅                       |
 | Matching                | [details](https://github.com/clvv/fasd#matching) | [see Matching](#matching) |
 | Backends                | neovim, vim, spotlight | [neovim](https://github.com/wyne/fasder.nvim) |
@@ -208,7 +209,7 @@ Matching works similarly to zoxide and obeys the following rules:
 | `-t` recent access only | ✅                      | ❌                       |
 | `-b` specify backend    | ✅                      | ❌                       |
 | `-i` interactive        | ✅                      | ❌                       |
-| `-s` list ranks         | ✅                      | ✅                       |
+| `-s` list scores        | ✅                      | ✅                       |
 | `-r` sort by rank       | ✅                      | ❌                       |
 | `-[0-9]` nth entry      | ✅                      | ❌                       |
 | `-B` additional backend | ✅                      | ❌                       |
