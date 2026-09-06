@@ -92,19 +92,17 @@ func readEntriesFromReader(r io.Reader) ([]PathEntry, error) {
 
 var mu sync.Mutex
 
-// writeFileStore ages the entries if they have grown past the rank threshold,
-// then writes them out.
-func writeFileStore(entries []PathEntry) {
-	var cumulativeRank float64
-	for _, entry := range entries {
-		cumulativeRank += entry.Rank
-	}
-
+// writeFileStore ages the entries if the store has grown past the rank
+// threshold, then writes them out. priorRank is the total read out of the data
+// file: fasd sums the ranks of the lines it reads, before applying any
+// rank + 1/rank increment and without counting the paths being added, so the
+// caller supplies that rather than the post-update total.
+func writeFileStore(entries []PathEntry, priorRank float64) {
 	// Apply decay if cumulative rank exceeds threshold
 	const threshold = 2000.0
 	const decayFactor = 0.9
 
-	if cumulativeRank > threshold {
+	if priorRank > threshold {
 		logger.Log.Println("Rank threshold met. Decaying...")
 		for i := range entries {
 			entries[i].Rank *= decayFactor
@@ -217,6 +215,14 @@ func AddToStore(paths ...string) {
 
 	entries = pruneDecayed(entries)
 
+	// Totalled here, after the prune and before any increment, because that is
+	// what fasd's `count += $2` accumulates: the ranks of the surviving lines
+	// as they were read, with the paths being added excluded.
+	var priorRank float64
+	for _, entry := range entries {
+		priorRank += entry.Rank
+	}
+
 	now := time.Now().Unix()
 	seen := make(map[string]bool, len(paths))
 
@@ -254,5 +260,5 @@ func AddToStore(paths ...string) {
 	}
 
 	// Write updated entries back to the file
-	writeFileStore(entries)
+	writeFileStore(entries, priorRank)
 }

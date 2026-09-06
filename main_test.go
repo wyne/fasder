@@ -815,3 +815,83 @@ func TestAddToStoreCountsRepeatedPathsOnce(t *testing.T) {
 		t.Fatalf("Expected a single entry at rank 1, but got %v", entries)
 	}
 }
+
+func TestDecayIgnoresNewlyAddedPaths(t *testing.T) {
+	cwd, readEntries := setupProcTest(t)
+
+	high := filepath.Join(cwd, "high")
+	first := filepath.Join(cwd, "first")
+	second := filepath.Join(cwd, "second")
+	for _, dir := range []string{high, first, second} {
+		if err := os.MkdirAll(dir, 0700); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// Just under the threshold. Counting the two new paths would push the
+	// total to 2001 and age the store, but fasd's `count += $2` only sums the
+	// lines it read, so 1999 stands and nothing is aged.
+	writeEntries([]PathEntry{{Path: high, Rank: 1999, LastAccessed: 100}})
+
+	AddPaths([]string{first, second})
+
+	expected := map[string]float64{high: 1999, first: 1, second: 1}
+	assertRanks(t, readEntries(), expected)
+}
+
+func TestDecayIgnoresTheRankIncrement(t *testing.T) {
+	cwd, readEntries := setupProcTest(t)
+
+	high := filepath.Join(cwd, "high")
+	if err := os.MkdirAll(high, 0700); err != nil {
+		t.Fatal(err)
+	}
+	// Exactly at the threshold, which is not over it. Re-adding this path
+	// raises it to 2000.0005, but fasd totals the pre-increment rank, so the
+	// store is not aged.
+	writeEntries([]PathEntry{{Path: high, Rank: 2000, LastAccessed: 100}})
+
+	AddPaths([]string{high})
+
+	assertRanks(t, readEntries(), map[string]float64{high: 2000 + 1.0/2000})
+}
+
+func TestDecayIgnoresPrunedEntries(t *testing.T) {
+	cwd, readEntries := setupProcTest(t)
+
+	high := filepath.Join(cwd, "high")
+	faded := filepath.Join(cwd, "faded")
+	fresh := filepath.Join(cwd, "fresh")
+	for _, dir := range []string{high, faded, fresh} {
+		if err := os.MkdirAll(dir, 0700); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// fasd accumulates count inside the `$2 >= 1` block, so a line below the
+	// prune threshold contributes nothing to the decay decision.
+	writeEntries([]PathEntry{
+		{Path: high, Rank: 1999.5, LastAccessed: 100},
+		{Path: faded, Rank: 0.9, LastAccessed: 200},
+	})
+
+	AddPaths([]string{fresh})
+
+	expected := map[string]float64{high: 1999.5, fresh: 1}
+	assertRanks(t, readEntries(), expected)
+}
+
+func assertRanks(t *testing.T, entries []PathEntry, expected map[string]float64) {
+	t.Helper()
+
+	if len(entries) != len(expected) {
+		t.Fatalf("Expected %d entries, but got %v", len(expected), entries)
+	}
+	for _, entry := range entries {
+		want, ok := expected[entry.Path]
+		if !ok {
+			t.Fatalf("Unexpected entry %v", entry)
+		}
+		if math.Abs(entry.Rank-want) > 1e-6 {
+			t.Fatalf("Expected %s at rank %v, but got %v", entry.Path, want, entry.Rank)
+		}
+	}
+}
