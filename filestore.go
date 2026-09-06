@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -19,7 +20,24 @@ import (
 
 var dataFile string
 
+// dataDir returns the directory a new store belongs in, following zoxide:
+// XDG_DATA_HOME or ~/.local/share on Linux and BSD, and ~/Library/Application
+// Support on macOS, where XDG is not the platform convention. fasd itself has
+// no XDG support and always uses $HOME/.fasd, so this is a deliberate
+// departure rather than a compatibility fix.
+func dataDir(goos string, homeDir string, xdgDataHome string) string {
+	if goos == "darwin" {
+		return filepath.Join(homeDir, "Library", "Application Support")
+	}
+	if xdgDataHome != "" {
+		return xdgDataHome
+	}
+	return filepath.Join(homeDir, ".local", "share")
+}
+
 func LoadFileStore() {
+	// _FASDER_DATA wins outright, whether or not the file exists yet, matching
+	// how fasd treats _FASD_DATA.
 	dataFile = os.Getenv("_FASDER_DATA")
 	if dataFile == "" {
 		homeDir, err := os.UserHomeDir()
@@ -27,8 +45,22 @@ func LoadFileStore() {
 			// Silently return
 			return
 		}
-		// Expand the ~ to the home directory
-		dataFile = filepath.Join(homeDir, ".fasder")
+
+		// Keep using a store that predates the move, so upgrading does not
+		// strand an existing ranking.
+		legacyFile := filepath.Join(homeDir, ".fasder")
+		if _, err := os.Stat(legacyFile); err == nil {
+			dataFile = legacyFile
+		} else {
+			dataFile = filepath.Join(
+				dataDir(runtime.GOOS, homeDir, os.Getenv("XDG_DATA_HOME")),
+				"fasder",
+				"data",
+			)
+			if err := os.MkdirAll(filepath.Dir(dataFile), 0700); err != nil {
+				log.Fatal(err)
+			}
+		}
 	}
 
 	// Check if the file exists and is owned by the current user

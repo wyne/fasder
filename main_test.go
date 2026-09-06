@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -893,5 +894,114 @@ func assertRanks(t *testing.T, entries []PathEntry, expected map[string]float64)
 		if math.Abs(entry.Rank-want) > 1e-6 {
 			t.Fatalf("Expected %s at rank %v, but got %v", entry.Path, want, entry.Rank)
 		}
+	}
+}
+
+func TestDataDirFollowsZoxide(t *testing.T) {
+	home := filepath.Join("/home", "someone")
+	tests := []struct {
+		name        string
+		goos        string
+		xdgDataHome string
+		expected    string
+	}{
+		{
+			name:        "linux honours XDG_DATA_HOME",
+			goos:        "linux",
+			xdgDataHome: "/custom/data",
+			expected:    "/custom/data",
+		},
+		{
+			name:     "linux falls back to the spec default when unset",
+			goos:     "linux",
+			expected: filepath.Join(home, ".local", "share"),
+		},
+		{
+			name:        "an empty XDG_DATA_HOME is treated as unset, not as a relative path",
+			goos:        "linux",
+			xdgDataHome: "",
+			expected:    filepath.Join(home, ".local", "share"),
+		},
+		{
+			name:     "freebsd behaves like linux",
+			goos:     "freebsd",
+			expected: filepath.Join(home, ".local", "share"),
+		},
+		{
+			name:     "macos uses the platform directory",
+			goos:     "darwin",
+			expected: filepath.Join(home, "Library", "Application Support"),
+		},
+		{
+			name:        "macos ignores XDG_DATA_HOME, as zoxide does",
+			goos:        "darwin",
+			xdgDataHome: "/custom/data",
+			expected:    filepath.Join(home, "Library", "Application Support"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := dataDir(tt.goos, home, tt.xdgDataHome); got != tt.expected {
+				t.Fatalf("Expected %q, but got %q", tt.expected, got)
+			}
+		})
+	}
+}
+
+func TestLoadFileStoreUsesEnvForAFileThatDoesNotExistYet(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	// A store that predates the move, which must not win over the environment.
+	if err := os.WriteFile(filepath.Join(home, ".fasder"), nil, 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	wanted := filepath.Join(t.TempDir(), "not-created-yet")
+	t.Setenv("_FASDER_DATA", wanted)
+
+	LoadFileStore()
+
+	if dataFile != wanted {
+		t.Fatalf("Expected %q, but got %q", wanted, dataFile)
+	}
+}
+
+func TestLoadFileStoreKeepsAnExistingLegacyStore(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("_FASDER_DATA", "")
+	t.Setenv("XDG_DATA_HOME", t.TempDir())
+
+	legacy := filepath.Join(home, ".fasder")
+	if err := os.WriteFile(legacy, nil, 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	LoadFileStore()
+
+	if dataFile != legacy {
+		t.Fatalf("Expected the legacy store %q, but got %q", legacy, dataFile)
+	}
+}
+
+func TestLoadFileStoreCreatesTheDataDirectoryForANewStore(t *testing.T) {
+	home := t.TempDir()
+	xdg := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("_FASDER_DATA", "")
+	t.Setenv("XDG_DATA_HOME", xdg)
+
+	LoadFileStore()
+
+	expected := filepath.Join(dataDir(runtime.GOOS, home, xdg), "fasder", "data")
+	if dataFile != expected {
+		t.Fatalf("Expected %q, but got %q", expected, dataFile)
+	}
+	if !filepath.IsAbs(dataFile) {
+		t.Fatalf("Expected an absolute path, but got %q", dataFile)
+	}
+	if info, err := os.Stat(filepath.Dir(dataFile)); err != nil || !info.IsDir() {
+		t.Fatalf("Expected the data directory to exist, but got %v", err)
 	}
 }

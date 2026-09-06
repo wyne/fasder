@@ -162,6 +162,21 @@ directory. The filtering lists can be configured with these variables:
 
 Values are whitespace-separated. Export a variable to replace its default list.
 
+### Data file location
+
+`fasder` stores its ranking in one file, resolved in this order:
+
+1. `$_FASDER_DATA`, if set, whether or not the file exists yet
+2. `~/.fasder`, if it already exists, so upgrading keeps an existing ranking
+3. otherwise a new store in the platform data directory:
+
+| Platform | Location |
+| --- | --- |
+| Linux, BSD | `$XDG_DATA_HOME/fasder/data`, or `~/.local/share/fasder/data` when unset |
+| macOS | `~/Library/Application Support/fasder/data` |
+
+This follows [zoxide](https://github.com/ajeetdsouza/zoxide#environment-variables). `fasd` has no XDG support and always uses `$HOME/.fasd`, so this is a deliberate departure rather than a compatibility feature.
+
 ### Matching
 
 Matching works similarly to zoxide and obeys the following rules:
