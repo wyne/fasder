@@ -209,6 +209,7 @@ Matching works similarly to zoxide and obeys the following rules:
 | Shell support           | zsh, bash, tcsh        | zsh                     |
 | Detect sub-shells       | ✅                      | ✅                       |
 | XDG base directories    | ❌ always `~/.fasd`     | ✅ [see Data file location](#data-file-location) |
+| Performance             | shell-script baseline  | faster in CLI benchmarks |
 | **Ranking**             |                        |                         |
 | Shell Hooks             | ✅                      | ✅                       |
 | Incr. on exec (`-e`)    | ✅                      | ✅                       |
@@ -249,3 +250,19 @@ Download and install `go`: https://go.dev/doc/install
 ### Build
 
 `go build` will output a `fasder` binary in the current directory.
+
+### Benchmark
+
+Compare Fasder against the original shell script implementation:
+
+```bash
+util/bench-compare.sh
+```
+
+The runner builds a temporary `fasder` binary, compares it with
+`~/workspace/clvv-fasd/fasd`, and generates identical synthetic stores for both
+tools. Configure it with:
+
+```bash
+FASDER_BENCH_FASD=/path/to/fasd FASDER_BENCH_ENTRIES=2000 FASDER_BENCH_COUNT=5 util/bench-compare.sh
+```
