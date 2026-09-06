@@ -172,7 +172,7 @@ Values are whitespace-separated. Export a variable to replace its default list.
 
 | Platform | Location |
 | --- | --- |
-| Linux, BSD | `$XDG_DATA_HOME/fasder/data`, or `~/.local/share/fasder/data` when unset |
+| Linux, BSD | `$XDG_DATA_HOME/fasder/data`, or `~/.local/share/fasder/data` when unset or not an absolute path |
 | macOS | `~/Library/Application Support/fasder/data` |
 
 This follows [zoxide](https://github.com/ajeetdsouza/zoxide#environment-variables). `fasd` has no XDG support and always uses `$HOME/.fasd`, so this is a deliberate departure rather than a compatibility feature.

@@ -25,11 +25,17 @@ var dataFile string
 // Support on macOS, where XDG is not the platform convention. fasd itself has
 // no XDG support and always uses $HOME/.fasd, so this is a deliberate
 // departure rather than a compatibility fix.
+//
+// XDG_DATA_HOME is only honoured when absolute. The spec requires it: "All
+// paths set in these environment variables must be absolute. If an
+// implementation encounters a relative path in any of these variables it
+// should consider the path invalid and ignore it." IsAbs also rejects the
+// empty string, so an unset variable falls through the same way.
 func dataDir(goos string, homeDir string, xdgDataHome string) string {
 	if goos == "darwin" {
 		return filepath.Join(homeDir, "Library", "Application Support")
 	}
-	if xdgDataHome != "" {
+	if filepath.IsAbs(xdgDataHome) {
 		return xdgDataHome
 	}
 	return filepath.Join(homeDir, ".local", "share")

@@ -923,6 +923,18 @@ func TestDataDirFollowsZoxide(t *testing.T) {
 			expected:    filepath.Join(home, ".local", "share"),
 		},
 		{
+			name:        "a relative XDG_DATA_HOME is invalid and ignored",
+			goos:        "linux",
+			xdgDataHome: "rel-data",
+			expected:    filepath.Join(home, ".local", "share"),
+		},
+		{
+			name:        "an unexpanded tilde is relative too",
+			goos:        "linux",
+			xdgDataHome: "~/data",
+			expected:    filepath.Join(home, ".local", "share"),
+		},
+		{
 			name:     "freebsd behaves like linux",
 			goos:     "freebsd",
 			expected: filepath.Join(home, ".local", "share"),
