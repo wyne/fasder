@@ -221,3 +221,52 @@ func TestBestEntryIgnoresSortDirection(t *testing.T) {
 		t.Fatalf("Expected /low-rank-fresh, but got %v", got.Path)
 	}
 }
+
+func TestCommandArgs(t *testing.T) {
+	tests := []struct {
+		name     string
+		command  string
+		path     string
+		expected []string
+	}{
+		{
+			name:     "single word command keeps a spaced path whole",
+			command:  "vim",
+			path:     "/tmp/my file.txt",
+			expected: []string{"vim", "/tmp/my file.txt"},
+		},
+		{
+			name:     "multi word command splits into arguments",
+			command:  "printf %s",
+			path:     "/tmp/plain.txt",
+			expected: []string{"printf", "%s", "/tmp/plain.txt"},
+		},
+		{
+			name:     "multi word command with a spaced path",
+			command:  "git add",
+			path:     "/tmp/my file.txt",
+			expected: []string{"git", "add", "/tmp/my file.txt"},
+		},
+		{
+			name:     "surrounding whitespace is ignored",
+			command:  "  code  --wait  ",
+			path:     "/tmp/my dir",
+			expected: []string{"code", "--wait", "/tmp/my dir"},
+		},
+		{
+			name:     "blank command yields no arguments",
+			command:  "   ",
+			path:     "/tmp/plain.txt",
+			expected: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := commandArgs(tt.command, tt.path)
+			if !reflect.DeepEqual(got, tt.expected) {
+				t.Fatalf("Expected %v, but got %v", tt.expected, got)
+			}
+		})
+	}
+}

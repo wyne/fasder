@@ -77,10 +77,6 @@ func Proc(args []string) {
 	AddPaths(paths)
 }
 
-func Add(args string) {
-	AddPaths(strings.Split(args, " "))
-}
-
 func AddPaths(args []string) {
 	var validPaths []string
 
