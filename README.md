@@ -208,6 +208,7 @@ Matching works similarly to zoxide and obeys the following rules:
 | Man page                | ✅                      | ❌                       |
 | Shell support           | zsh, bash, tcsh        | zsh                     |
 | Detect sub-shells       | ✅                      | ✅                       |
+| XDG base directories    | ❌ always `~/.fasd`     | ✅ [see Data file location](#data-file-location) |
 | **Ranking**             |                        |                         |
 | Shell Hooks             | ✅                      | ✅                       |
 | Incr. on exec (`-e`)    | ✅                      | ✅                       |
