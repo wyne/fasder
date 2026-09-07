@@ -10,13 +10,8 @@ original shell script implementation in `~/workspace/clvv-fasd`.
 
 ### Highest impact
 
-- [ ] Use true frecency scoring for normal queries.
-      Original `fasd` scores normal results as rank multiplied by a recency
-      weight. Fasder currently sorts by stored rank first and only uses
-      last-access time as a tie-breaker.
-- [ ] Add explicit query modes for rank-only and recent-only results.
-      Original flags: `-r` for rank-only and `-t` for recent-only.
-- [ ] Add `--delete` / `-D` to remove paths from the store.
+- [ ] Add a recent-only query mode.
+      Original flag: `-t` for recent-only.
 - [ ] Add nth-result selection with `-[0-9]`.
       This supports commands such as selecting the second or third match
       without entering an interactive picker.

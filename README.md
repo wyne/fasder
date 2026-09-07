@@ -122,8 +122,9 @@ fasder [options] [query ...]
     -f, --files         Files only
     -h, --help          Show this message
     -l, --list          List only. Omit rankings
+    -r, --rank          Sort by rank only, ignoring recency
     -R, --reverse       Reverse sort. Useful to pipe into fzf
-    -s, --s             Show frecency scores
+    -s, --scores        Show scores
     -v, --version       View version
 ```
 
@@ -228,7 +229,7 @@ Matching works similarly to zoxide and obeys the following rules:
 | `-b` specify backend    | ✅                      | ❌                       |
 | `-i` interactive        | ✅                      | ❌                       |
 | `-s` list scores        | ✅                      | ✅                       |
-| `-r` sort by rank       | ✅                      | ❌                       |
+| `-r` sort by rank       | ✅                      | ✅                       |
 | `-[0-9]` nth entry      | ✅                      | ❌                       |
 | `-B` additional backend | ✅                      | ❌                       |
 | `-R` reverse            | ✅                      | ✅                       |

@@ -29,6 +29,11 @@ func sortEntriesAt(entries []PathEntry, reverse bool, now int64) []PathEntry {
 	return entries
 }
 
+func sortEntriesByRank(entries []PathEntry, reverse bool) []PathEntry {
+	sort.Sort(ByRank{entries, reverse})
+	return entries
+}
+
 type ByFrecentScore struct {
 	entries []PathEntry
 	reverse bool
@@ -53,6 +58,31 @@ func (a ByFrecentScore) Less(i, j int) bool {
 		return scoreI < scoreJ
 	}
 	return a.entries[i].LastAccessed < a.entries[j].LastAccessed
+}
+
+type ByRank struct {
+	entries []PathEntry
+	reverse bool
+}
+
+func (a ByRank) Len() int { return len(a.entries) }
+func (a ByRank) Swap(i, j int) {
+	a.entries[i], a.entries[j] = a.entries[j], a.entries[i]
+}
+
+func (a ByRank) Less(i, j int) bool {
+	if a.entries[i].Rank != a.entries[j].Rank {
+		if a.reverse {
+			return a.entries[i].Rank > a.entries[j].Rank
+		}
+		return a.entries[i].Rank < a.entries[j].Rank
+	}
+	// fasd emits score-prefixed rows and relies on sort -n/-nr, whose equal
+	// numeric scores fall back to comparing the path text.
+	if a.reverse {
+		return a.entries[i].Path > a.entries[j].Path
+	}
+	return a.entries[i].Path < a.entries[j].Path
 }
 
 func frecentScore(entry PathEntry, now int64) float64 {

@@ -174,6 +174,62 @@ func TestSubshellDetectionReversed(t *testing.T) {
 	checkOutput(t, r, []string{paths[1]})
 }
 
+func writeRankDisagreementStore(t *testing.T, paths []string) {
+	t.Helper()
+
+	now := time.Now().Unix()
+	mockData := fmt.Sprintf(
+		"%s|10.0|%d\n%s|2.0|%d",
+		paths[0],
+		now-604800,
+		paths[1],
+		now-10,
+	)
+	if err := os.WriteFile(dataFile, []byte(mockData), 0600); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestRankFlagListsByRawRank(t *testing.T) {
+	teardown, r, w, paths := setupTest(t)
+	defer teardown()
+
+	LoadFileStore()
+	writeRankDisagreementStore(t, paths)
+	os.Args = []string{"cmd", "-r", "-l"}
+	main()
+
+	w.Close()
+	checkOutput(t, r, []string{paths[1], paths[0]})
+}
+
+func TestRankFlagSubshellPromotesRawRankBestMatch(t *testing.T) {
+	teardown, r, w, paths := setupTest(t)
+	defer teardown()
+
+	LoadFileStore()
+	writeRankDisagreementStore(t, paths)
+	os.Args = []string{"cmd", "-r"}
+	main()
+
+	w.Close()
+	checkOutput(t, r, []string{paths[0]})
+
+	entries, err := readFileStore()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 2 {
+		t.Fatalf("Expected 2 entries, but got %v", entries)
+	}
+	if math.Abs(entries[0].Rank-10.1) > 0.00001 {
+		t.Fatalf("Expected raw-rank best match to be promoted to 10.1, but got %v", entries[0].Rank)
+	}
+	if entries[1].Rank != 2 {
+		t.Fatalf("Expected frecency winner to stay at rank 2, but got %v", entries[1].Rank)
+	}
+}
+
 func TestExecuteUsesBestMatchWhenReversed(t *testing.T) {
 	teardown, r, w, paths := setupTest(t)
 	defer teardown()

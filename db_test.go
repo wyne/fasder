@@ -201,6 +201,61 @@ func TestSortEntriesReversesFrecentScore(t *testing.T) {
 	}
 }
 
+func TestSortEntriesByRankIgnoresRecency(t *testing.T) {
+	now := int64(1_700_000_000)
+	entries := []PathEntry{
+		{Path: "/older-high-rank", Rank: 10, LastAccessed: now - 604800},
+		{Path: "/recent-low-rank", Rank: 2, LastAccessed: now - 10},
+		{Path: "/middle", Rank: 5, LastAccessed: now - 3600},
+	}
+
+	got := sortEntriesByRank(entries, false)
+	actualPaths := []string{got[0].Path, got[1].Path, got[2].Path}
+	expectedPaths := []string{"/recent-low-rank", "/middle", "/older-high-rank"}
+	if !reflect.DeepEqual(actualPaths, expectedPaths) {
+		t.Fatalf("Expected %v, but got %v", expectedPaths, actualPaths)
+	}
+}
+
+func TestSortEntriesByRankReversesRawRank(t *testing.T) {
+	now := int64(1_700_000_000)
+	entries := []PathEntry{
+		{Path: "/older-high-rank", Rank: 10, LastAccessed: now - 604800},
+		{Path: "/recent-low-rank", Rank: 2, LastAccessed: now - 10},
+		{Path: "/middle", Rank: 5, LastAccessed: now - 3600},
+	}
+
+	got := sortEntriesByRank(entries, true)
+	actualPaths := []string{got[0].Path, got[1].Path, got[2].Path}
+	expectedPaths := []string{"/older-high-rank", "/middle", "/recent-low-rank"}
+	if !reflect.DeepEqual(actualPaths, expectedPaths) {
+		t.Fatalf("Expected %v, but got %v", expectedPaths, actualPaths)
+	}
+}
+
+func TestSortEntriesByRankBreaksTiesByPath(t *testing.T) {
+	entries := []PathEntry{
+		{Path: "/p07", Rank: 1},
+		{Path: "/p02", Rank: 1},
+		{Path: "/p11", Rank: 1},
+		{Path: "/p00", Rank: 1},
+	}
+
+	got := sortEntriesByRank(entries, false)
+	actualPaths := []string{got[0].Path, got[1].Path, got[2].Path, got[3].Path}
+	expectedPaths := []string{"/p00", "/p02", "/p07", "/p11"}
+	if !reflect.DeepEqual(actualPaths, expectedPaths) {
+		t.Fatalf("Expected %v, but got %v", expectedPaths, actualPaths)
+	}
+
+	got = sortEntriesByRank(entries, true)
+	actualPaths = []string{got[0].Path, got[1].Path, got[2].Path, got[3].Path}
+	expectedPaths = []string{"/p11", "/p07", "/p02", "/p00"}
+	if !reflect.DeepEqual(actualPaths, expectedPaths) {
+		t.Fatalf("Expected %v, but got %v", expectedPaths, actualPaths)
+	}
+}
+
 func TestBestEntryIgnoresSortDirection(t *testing.T) {
 	now := time.Now().Unix()
 	// Frecency and raw rank disagree here: the fresher entry scores 2*6=12
