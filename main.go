@@ -115,8 +115,9 @@ func main() {
 	}
 
 	if onlyOne {
-		bestMatch := []PathEntry{bestEntry(sortedEntries, *reverse)}
-		displaySortedEntries(bestMatch, *list)
+		bestMatch := bestEntry(sortedEntries, *reverse)
+		AddPaths([]string{bestMatch.Path})
+		displaySortedEntries([]PathEntry{bestMatch}, *list)
 	} else {
 		displaySortedEntries(sortedEntries, !*scores)
 	}

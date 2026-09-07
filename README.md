@@ -272,12 +272,9 @@ where fasd auto-selected `/usr/bin/awk` (`awk version 20200816`):
 
 | Case | Fasder median | fasd median | Fasder speedup |
 | --- | ---: | ---: | ---: |
-| Broad list query | 13.9 ms | 297.0 ms | 21.4x |
-| Directory filter query | 7.6 ms | 51.9 ms | 6.9x |
-| File filter query | 7.0 ms | 51.8 ms | 7.4x |
-| Subshell best match | 11.6 ms | 306.5 ms | 26.5x |
-| Add new path | 15.0 ms | 31.8 ms | 2.1x |
-| Delete path | 14.0 ms | 20.2 ms | 1.4x |
-
-`subshell_best_match` reflects current CLI behavior end to end: original
-`fasd` promotes the selected path in subshell mode, while Fasder only prints it.
+| Broad list query | 13.8 ms | 278.3 ms | 20.2x |
+| Directory filter query | 6.8 ms | 54.4 ms | 8.0x |
+| File filter query | 7.1 ms | 56.4 ms | 7.9x |
+| Subshell best match | 23.4 ms | 305.2 ms | 13.0x |
+| Add new path | 15.5 ms | 29.8 ms | 1.9x |
+| Delete path | 15.0 ms | 26.2 ms | 1.7x |

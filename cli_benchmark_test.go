@@ -62,8 +62,8 @@ func BenchmarkCliCompare(b *testing.B) {
 			args: func(*benchmarkFixture) []string {
 				return []string{"bench"}
 			},
-			// Original fasd promotes the selected best match in this mode, so reset
-			// the store before every iteration to keep each run comparable.
+			// Both tools promote the selected best match in this mode, so reset the
+			// store before every iteration to keep each run comparable.
 			resetStore: true,
 		},
 		{
