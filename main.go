@@ -13,6 +13,8 @@ import (
 // Global variable to hold the logger
 var Logger *log.Logger
 
+const appVersion = "0.1.7" // x-release-please-version
+
 func main() {
 	logger.InitLog()
 
@@ -47,7 +49,7 @@ func main() {
 	// Commands
 
 	if *version {
-		println("0.1.7")
+		println(appVersion)
 		return
 	}
 

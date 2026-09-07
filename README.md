@@ -252,6 +252,35 @@ Download and install `go`: https://go.dev/doc/install
 
 `go build` will output a `fasder` binary in the current directory.
 
+### Releases
+
+Releases are managed with
+[release-please](https://github.com/googleapis/release-please).
+
+Every push to `main` updates a standing `chore: release X.Y.Z` pull request
+from conventional commit titles. Merging that release PR updates
+`CHANGELOG.md`, bumps the version in `main.go`, tags the merge commit, creates
+the GitHub release, and uploads the `fasder-X.Y.Z.tar.gz` source archive used
+by the Homebrew tap.
+
+Use conventional PR titles so release-please can classify each change:
+
+| Prefix | Effect |
+| --- | --- |
+| `fix:` | Patch release |
+| `feat:` | Minor release |
+| `feat!:` or `BREAKING CHANGE:` | Major release |
+| `docs:`, `ci:`, `build:`, `refactor:`, `chore:` | Changelog entry, no version bump |
+
+After the source release is published, update the Homebrew formula in
+`wyne/homebrew-tap` and publish bottles from the tap PR with the `pr-pull`
+label.
+
+For checked release PRs, configure a `RELEASE_PLEASE_TOKEN` repository secret
+with contents, pull request, and issues write access. Without that secret, the
+workflow falls back to `GITHUB_TOKEN`; the release PR can still be maintained,
+but GitHub may not run the usual PR checks on bot-created commits.
+
 ### Benchmarks
 
 Compare Fasder against the original shell script implementation:
