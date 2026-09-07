@@ -112,6 +112,55 @@ func TestSubshellDetection(t *testing.T) {
 	checkOutput(t, r, []string{paths[1]})
 }
 
+func TestSubshellDetectionPromotesBestMatch(t *testing.T) {
+	teardown, r, w, paths := setupTest(t)
+	defer teardown()
+
+	LoadFileStore()
+	os.Args = []string{"cmd"}
+	main()
+
+	w.Close()
+	checkOutput(t, r, []string{paths[1]})
+
+	entries, err := readFileStore()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 2 {
+		t.Fatalf("Expected 2 entries, but got %v", entries)
+	}
+	if entries[0].Rank != 1 {
+		t.Fatalf("Expected unselected path rank to stay 1, but got %v", entries[0].Rank)
+	}
+	if entries[1].Rank != 2.5 {
+		t.Fatalf("Expected selected path rank to be promoted to 2.5, but got %v", entries[1].Rank)
+	}
+}
+
+func TestListDoesNotPromoteBestMatch(t *testing.T) {
+	teardown, r, w, paths := setupTest(t)
+	defer teardown()
+
+	LoadFileStore()
+	os.Args = []string{"cmd", "-l"}
+	main()
+
+	w.Close()
+	checkOutput(t, r, []string{paths[0], paths[1]})
+
+	entries, err := readFileStore()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 2 {
+		t.Fatalf("Expected 2 entries, but got %v", entries)
+	}
+	if entries[0].Rank != 1 || entries[1].Rank != 2 {
+		t.Fatalf("Expected list mode to leave ranks untouched, but got %v", entries)
+	}
+}
+
 func TestSubshellDetectionReversed(t *testing.T) {
 	teardown, r, w, paths := setupTest(t)
 	defer teardown()
