@@ -37,7 +37,7 @@ type benchmarkCase struct {
 
 func BenchmarkCliCompare(b *testing.B) {
 	tools := benchmarkTools(b)
-	entries := benchmarkEntryCount()
+	entries := benchmarkEntryCount(b)
 	cases := []benchmarkCase{
 		{
 			name: "query_broad_list",
@@ -153,10 +153,16 @@ func benchmarkTools(b *testing.B) []benchmarkTool {
 	return tools
 }
 
-func benchmarkEntryCount() int {
-	entries, err := strconv.Atoi(os.Getenv("FASDER_BENCH_ENTRIES"))
-	if err != nil || entries < 2 {
+func benchmarkEntryCount(b *testing.B) int {
+	b.Helper()
+
+	raw := os.Getenv("FASDER_BENCH_ENTRIES")
+	if raw == "" {
 		return defaultBenchmarkEntries
+	}
+	entries, err := strconv.Atoi(raw)
+	if err != nil || entries < 2 {
+		b.Fatalf("FASDER_BENCH_ENTRIES must be an integer >= 2, got %q", raw)
 	}
 	return entries
 }
