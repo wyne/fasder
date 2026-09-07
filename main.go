@@ -47,7 +47,7 @@ func main() {
 	// Commands
 
 	if *version {
-		println("0.1.6")
+		println("0.1.7")
 		return
 	}
 
