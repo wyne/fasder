@@ -120,17 +120,12 @@ func main() {
 		return
 	}
 
-	display := displaySortedEntries
-	if *rankSort {
-		display = displayRankSortedEntries
-	}
-
 	if onlyOne {
 		bestMatch := bestEntry(sortedEntries, *reverse)
 		AddPaths([]string{bestMatch.Path})
-		display([]PathEntry{bestMatch}, *list)
+		displayEntries([]PathEntry{bestMatch}, *list, *rankSort)
 	} else {
-		display(sortedEntries, !*scores)
+		displayEntries(sortedEntries, !*scores, *rankSort)
 	}
 }
 

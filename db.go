@@ -77,6 +77,8 @@ func (a ByRank) Less(i, j int) bool {
 		}
 		return a.entries[i].Rank < a.entries[j].Rank
 	}
+	// fasd emits score-prefixed rows and relies on sort -n/-nr, whose equal
+	// numeric scores fall back to comparing the path text.
 	if a.reverse {
 		return a.entries[i].Path > a.entries[j].Path
 	}
