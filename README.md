@@ -124,7 +124,7 @@ fasder [options] [query ...]
     -l, --list          List only. Omit rankings
     -r, --rank          Sort by rank only, ignoring recency
     -R, --reverse       Reverse sort. Useful to pipe into fzf
-    -s, --s             Show scores
+    -s, --scores        Show scores
     -v, --version       View version
 ```
 
