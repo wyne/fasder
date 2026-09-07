@@ -267,7 +267,8 @@ Configure it with:
 FASDER_BENCH_FASD=/path/to/fasd FASDER_BENCH_ENTRIES=2000 FASDER_BENCH_COUNT=5 util/bench-compare.sh
 ```
 
-Initial benchmark results with 2,000 synthetic entries on an Apple M2 Max:
+Initial benchmark results with 2,000 synthetic entries on an Apple M2 Max,
+where fasd auto-selected `/usr/bin/awk` (`awk version 20200816`):
 
 | Case | Fasder median | fasd median | Fasder speedup |
 | --- | ---: | ---: | ---: |
@@ -277,3 +278,6 @@ Initial benchmark results with 2,000 synthetic entries on an Apple M2 Max:
 | Subshell best match | 11.6 ms | 306.5 ms | 26.5x |
 | Add new path | 15.0 ms | 31.8 ms | 2.1x |
 | Delete path | 14.0 ms | 20.2 ms | 1.4x |
+
+`subshell_best_match` reflects current CLI behavior end to end: original
+`fasd` promotes the selected path in subshell mode, while Fasder only prints it.

@@ -130,7 +130,6 @@ func benchmarkTools(b *testing.B) []benchmarkTool {
 			path: path,
 			env: func(f *benchmarkFixture) []string {
 				return benchmarkEnv(map[string]string{
-					"_FASD_AWK":      "awk",
 					"_FASD_BACKENDS": "native",
 					"_FASD_DATA":     f.store,
 					"_FASD_FUZZY":    "2",
@@ -238,7 +237,7 @@ func benchmarkEnv(values map[string]string) []string {
 
 func setEnv(env []string, key string, value string) []string {
 	prefix := key + "="
-	next := env[:0]
+	next := make([]string, 0, len(env)+1)
 	for _, item := range env {
 		if !strings.HasPrefix(item, prefix) {
 			next = append(next, item)
