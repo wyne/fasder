@@ -1,0 +1,76 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: Maintain release PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@v5
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Checkout released tag
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.release.outputs.tag_name }}
+          fetch-depth: 0
+
+      - name: Set up Go
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Validate released version
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          actual_version="$(go run -buildvcs=false . --version)"
+          if [[ "${actual_version}" != "${VERSION}" ]]; then
+            echo "Version mismatch: release is ${VERSION}, but fasder reports ${actual_version}." >&2
+            exit 1
+          fi
+
+      - name: Run tests
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        run: go test -buildvcs=false ./...
+
+      - name: Upload source archive
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ steps.release.outputs.tag_name }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          archive="fasder-${VERSION}.tar.gz"
+          git archive \
+            --format=tar.gz \
+            --prefix="fasder-${VERSION}/" \
+            -o "${archive}" \
+            "refs/tags/${TAG_NAME}"
+
+          sha256sum "${archive}"
+          gh release upload "${TAG_NAME}" "${archive}" --clobber
