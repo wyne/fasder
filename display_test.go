@@ -20,7 +20,7 @@ func TestDisplayEntriesUsesFrecentScoreByDefault(t *testing.T) {
 		Path:         "/recent-high-score",
 		Rank:         10,
 		LastAccessed: time.Now().Unix() - 10,
-	}}, false, false)
+	}}, false, sortFrecent)
 
 	w.Close()
 	output := captureOutput(r)
@@ -42,7 +42,7 @@ func TestDisplayEntriesUsesRawRankScoreInRankMode(t *testing.T) {
 		Path:         "/recent-high-score",
 		Rank:         10,
 		LastAccessed: time.Now().Unix() - 10,
-	}}, false, true)
+	}}, false, sortRank)
 
 	w.Close()
 	output := captureOutput(r)
