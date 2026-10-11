@@ -64,6 +64,16 @@ echo 'eval "$(fasder --init auto aliases)"' >> ~/.zshrc
 cp ~/.fasd ~/.fasder
 ```
 
+#### Bash:
+
+```bash
+brew install wyne/tap/fasder fzf
+echo 'eval "$(fasder --init auto aliases)"' >> ~/.bashrc
+```
+
+Ensure your Bash login startup file sources `~/.bashrc` when using a login shell.
+Use `--init bash-hook` to install only Bash tracking explicitly.
+
 ## Usage
 
 Pass `aliases` to init, example: `--init auto aliases`, to install these aliases:
@@ -131,6 +141,11 @@ fasder [options] [query ...]
 ### How shell tracking works
 
 When Fasder is initialized, its zsh hook observes each command before it runs.
+In Bash, a prompt hook reads the latest history entry after the command runs,
+matching fasd's Bash tracking approach. It preserves existing string or array
+`PROMPT_COMMAND` handlers and the previous command's exit status. Bash history
+must be enabled; commands excluded by `HISTCONTROL` or `HISTIGNORE` cannot be
+tracked from history.
 After sanitizing the command, the hook passes it back to Fasder through the
 internal `--proc` flag. For example, running:
 
@@ -207,7 +222,7 @@ Matching works similarly to zoxide and obeys the following rules:
 | Brew formulae           | ❌                      | ✅ `wyne/tap/fasder`     |
 | Aliases                 | ✅ f, a, s, d, z        | ✅ f, a, d, j, jj, v, vv |
 | Man page                | ✅                      | ❌                       |
-| Shell support           | zsh, bash, tcsh        | zsh                     |
+| Shell support           | zsh, bash, tcsh        | zsh, bash               |
 | Detect sub-shells       | ✅                      | ✅                       |
 | XDG base directories    | ❌ always `~/.fasd`     | ✅ [see Data file location](#data-file-location) |
 | Performance             | shell-script baseline  | faster in [CLI benchmarks](#benchmarks) |

@@ -24,7 +24,7 @@ func main() {
 
 	// User flags
 	version := flag.BoolP("version", "v", false, "View version")
-	init := flag.BoolP("init", "", false, "Initialize fasder. Args: auto aliases")
+	init := flag.BoolP("init", "", false, "Initialize fasder. Args: auto aliases zsh-hook bash-hook")
 	execCmd := flag.StringP("exec", "e", "", "Execute provided command against best match")
 	list := flag.BoolP("list", "l", false, "List only. Omit rankings")
 	reverse := flag.BoolP("reverse", "R", false, "Reverse sort. Useful to pipe into fzf")
