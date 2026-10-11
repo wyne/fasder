@@ -28,7 +28,8 @@ func main() {
 	execCmd := flag.StringP("exec", "e", "", "Execute provided command against best match")
 	list := flag.BoolP("list", "l", false, "List only. Omit rankings")
 	reverse := flag.BoolP("reverse", "R", false, "Reverse sort. Useful to pipe into fzf")
-	rankSort := flag.BoolP("rank", "r", false, "Sort by rank only, ignoring recency")
+	mode := sortFrecent
+	registerSortFlags(flag.CommandLine, &mode)
 	scores := flag.BoolP("scores", "s", false, "Show scores")
 
 	filesOnly := flag.BoolP("files", "f", false, "Files only")
@@ -89,9 +90,12 @@ func main() {
 	matchingEntries := fuzzyFind(entries, searchTerm)
 	filteredEntries := filterEntries(matchingEntries, files, dirs)
 	var sortedEntries []PathEntry
-	if *rankSort {
+	switch mode {
+	case sortRank:
 		sortedEntries = sortEntriesByRank(filteredEntries, *reverse)
-	} else {
+	case sortRecent:
+		sortedEntries = sortEntriesByRecent(filteredEntries, *reverse)
+	default:
 		sortedEntries = sortEntries(filteredEntries, *reverse)
 	}
 
@@ -123,9 +127,9 @@ func main() {
 	if onlyOne {
 		bestMatch := bestEntry(sortedEntries, *reverse)
 		AddPaths([]string{bestMatch.Path})
-		displayEntries([]PathEntry{bestMatch}, *list, *rankSort)
+		displayEntries([]PathEntry{bestMatch}, *list, mode)
 	} else {
-		displayEntries(sortedEntries, !*scores, *rankSort)
+		displayEntries(sortedEntries, !*scores, mode)
 	}
 }
 

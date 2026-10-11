@@ -5,15 +5,21 @@ import (
 	"time"
 )
 
-func displayEntries(entries []PathEntry, list bool, rankScore bool) {
-	now := time.Now().Unix()
+func displayEntries(entries []PathEntry, list bool, mode sortMode) {
+	displayEntriesAt(entries, list, mode, time.Now().Unix())
+}
+
+func displayEntriesAt(entries []PathEntry, list bool, mode sortMode, now int64) {
 	for _, entry := range entries {
 		if list {
 			fmt.Println(entry.Path)
 		} else {
 			score := frecentScore(entry, now)
-			if rankScore {
+			switch mode {
+			case sortRank:
 				score = entry.Rank
+			case sortRecent:
+				score = recentScore(entry, now)
 			}
 			fmt.Printf(
 				"%-11.5f%s\n",

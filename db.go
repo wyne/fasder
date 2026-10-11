@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"os/exec"
 	"sort"
@@ -32,6 +33,33 @@ func sortEntriesAt(entries []PathEntry, reverse bool, now int64) []PathEntry {
 func sortEntriesByRank(entries []PathEntry, reverse bool) []PathEntry {
 	sort.Sort(ByRank{entries, reverse})
 	return entries
+}
+
+func sortEntriesByRecent(entries []PathEntry, reverse bool) []PathEntry {
+	return sortEntriesByRecentAt(entries, reverse, time.Now().Unix())
+}
+
+func sortEntriesByRecentAt(entries []PathEntry, reverse bool, now int64) []PathEntry {
+	sort.Slice(entries, func(i, j int) bool {
+		scoreI, scoreJ := recentScore(entries[i], now), recentScore(entries[j], now)
+		if scoreI == scoreJ {
+			if reverse {
+				return entries[i].Path > entries[j].Path
+			}
+			return entries[i].Path < entries[j].Path
+		}
+		if reverse {
+			return scoreI > scoreJ
+		}
+		return scoreI < scoreJ
+	})
+	return entries
+}
+
+func recentScore(entry PathEntry, now int64) float64 {
+	// Clamp clock-skewed future timestamps to avoid division by zero or NaN.
+	elapsed := math.Max(0, float64(now)-float64(entry.LastAccessed))
+	return math.Sqrt(100000 / (1 + elapsed))
 }
 
 type ByFrecentScore struct {

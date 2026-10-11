@@ -125,6 +125,7 @@ fasder [options] [query ...]
     -r, --rank          Sort by rank only, ignoring recency
     -R, --reverse       Reverse sort. Useful to pipe into fzf
     -s, --scores        Show scores
+    -t, --recent        Sort by recent access only, ignoring rank
     -v, --version       View version
 ```
 
@@ -225,7 +226,7 @@ Matching works similarly to zoxide and obeys the following rules:
 | `-a` all                | ✅                      | ✅                       |
 | `-e` execute            | ✅                      | ✅                       |
 | `-l` list without ranks | ✅                      | ✅                       |
-| `-t` recent access only | ✅                      | ❌                       |
+| `-t` recent access only | ✅                      | ✅                       |
 | `-b` specify backend    | ✅                      | ❌                       |
 | `-i` interactive        | ✅                      | ❌                       |
 | `-s` list scores        | ✅                      | ✅                       |
