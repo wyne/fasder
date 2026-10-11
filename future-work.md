@@ -12,7 +12,7 @@ original shell script implementation in `~/workspace/clvv-fasd`.
 
 - [ ] Add a recent-only query mode.
       Original flag: `-t` for recent-only.
-- [ ] Add nth-result selection with `-[0-9]`.
+- [x] Add nth-result selection with `-[0-9]`.
       This supports commands such as selecting the second or third match
       without entering an interactive picker.
 - [ ] Improve `-e` execution argument handling.
