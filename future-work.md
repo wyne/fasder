@@ -21,9 +21,9 @@ original shell script implementation in `~/workspace/clvv-fasd`.
 
 ### Shell integration
 
-- [ ] Support bash initialization.
-      Original `fasd --init auto` detects bash and installs the shell hook plus
-      command completion.
+- [x] Support bash initialization.
+      `--init auto` detects bash when evaluated and installs its prompt hook.
+      Shared aliases work in bash; command completion remains a separate gap.
 - [ ] Support POSIX shell initialization.
       Original `fasd` falls back to a prompt-based POSIX hook.
 - [ ] Consider tcsh aliases and hooks if parity across older shell setups is

@@ -21,10 +21,11 @@ func Init(args []string) {
 	for _, initializer := range args {
 		switch initializer {
 		case "auto":
-			// TODO: Support other shells
-			fmt.Println(ZshHook())
+			fmt.Println(AutoHook())
 		case "zsh-hook":
 			fmt.Println(ZshHook())
+		case "bash-hook":
+			fmt.Println(BashHook())
 		case "aliases":
 			fmt.Println(Aliases())
 			fmt.Println(fzfAliases())
