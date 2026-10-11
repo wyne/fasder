@@ -30,12 +30,13 @@ func main() {
 	reverse := flag.BoolP("reverse", "R", false, "Reverse sort. Useful to pipe into fzf")
 	rankSort := flag.BoolP("rank", "r", false, "Sort by rank only, ignoring recency")
 	scores := flag.BoolP("scores", "s", false, "Show scores")
+	selection := registerSelectionFlag(flag.CommandLine)
 
 	filesOnly := flag.BoolP("files", "f", false, "Files only")
 	dirsOnly := flag.BoolP("directories", "d", false, "Dirs only")
 
 	// CommandLine exits on parse errors in production; this return supports tests using ContinueOnError.
-	if err := flag.CommandLine.Parse(preserveCommandArgs(os.Args[1:])); err != nil {
+	if err := flag.CommandLine.Parse(normalizeSelectionArgs(flag.CommandLine, preserveCommandArgs(os.Args[1:]))); err != nil {
 		return
 	}
 
@@ -95,8 +96,15 @@ func main() {
 		sortedEntries = sortEntries(filteredEntries, *reverse)
 	}
 
-	var onlyOne bool
-	onlyOne = false
+	if *selection > 0 {
+		if *selection > uint(len(sortedEntries)) {
+			return
+		}
+		// fasd numbers matches in the opposite order to its displayed list.
+		sortedEntries = []PathEntry{sortedEntries[len(sortedEntries)-int(*selection)]}
+	}
+
+	onlyOne := *selection > 0
 
 	// to omit score ranks in output
 	if !term.IsTerminal(int(os.Stdout.Fd())) && !*list {
@@ -106,7 +114,7 @@ func main() {
 	// If running in a subshell (ex: vim `f zsh`), only
 	// return one result, and auto apply -l list mode
 	// to omit score ranks in output
-	if !term.IsTerminal(int(os.Stdout.Fd())) {
+	if !term.IsTerminal(int(os.Stdout.Fd())) || *selection > 0 {
 		*list = true
 	}
 

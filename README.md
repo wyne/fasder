@@ -126,7 +126,13 @@ fasder [options] [query ...]
     -R, --reverse       Reverse sort. Useful to pipe into fzf
     -s, --scores        Show scores
     -v, --version       View version
+    -[0-9], --select N  Select the nth match (1 = best; -R starts at worst)
 ```
+
+Use `fasder -d2 query` to select the second-best directory, or
+`fasder -2 -e 'printf %s' query` to execute a command on that match.
+Selection prints only the chosen path and promotes it, even with `-l` or `-s`.
+An out-of-range selector produces no output; `-0` disables selection.
 
 ### How shell tracking works
 
@@ -230,7 +236,7 @@ Matching works similarly to zoxide and obeys the following rules:
 | `-i` interactive        | ✅                      | ❌                       |
 | `-s` list scores        | ✅                      | ✅                       |
 | `-r` sort by rank       | ✅                      | ✅                       |
-| `-[0-9]` nth entry      | ✅                      | ❌                       |
+| `-[0-9]` nth entry      | ✅                      | ✅                       |
 | `-B` additional backend | ✅                      | ❌                       |
 | `-R` reverse            | ✅                      | ✅                       |
 | **Utility Flags**       |                        |                         |
